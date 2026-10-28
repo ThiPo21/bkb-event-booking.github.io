@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}สมัครสมาชิก (ยืนยัน OTP อีเมล) | BKB EVENT BOOKING{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-3 sm:px-6 py-8 sm:py-14">
+    <!-- กล่องลงทะเบียน สไตล์เหลี่ยม เรียบ คมชัด (Sharp & Minimalist UX/UI) -->
+    <div class="bg-white p-6 sm:p-8 border border-slate-300 shadow-2xs">
+        <div class="text-center mb-6 border-b border-slate-200 pb-5">
+            <div class="w-12 h-12 bg-sky-600 border border-sky-600 p-2 mx-auto mb-3 flex items-center justify-center shadow-xs">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="w-full h-full object-contain" alt="Emblem">
+            </div>
+            <span class="text-[10px] sm:text-xs font-bold text-cheero-700 bg-sky-50 px-2 py-0.5 border border-sky-200 uppercase font-mono tracking-wider">
+                MEMBER REGISTRATION
+            </span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-2 tracking-tight">สมัครสมาชิกใหม่</h2>
+            <p class="text-xs text-slate-500 mt-1 font-normal">ระบบยืนยันตัวตน 2 ชั้นด้วยรหัส OTP ทางอีเมล</p>
+        </div>
+
+        {% if step == 1 %}
+        <form method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="request_otp">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 font-mono">
+                    ชื่อผู้ใช้ (USERNAME): <span class="text-rose-600">*</span>
+                </label>
+                <input type="text" name="username" required 
+                       class="w-full px-3.5 py-2.5 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-medium focus:border-cheero-500"
+                       placeholder="เช่น basketball_king">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 font-mono">
+                    รหัสผ่าน (PASSWORD): <span class="text-rose-600">*</span>
+                </label>
+                <input type="password" id="regPagePassword" name="password" required 
+                       class="w-full px-3.5 py-2.5 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-medium focus:border-cheero-500"
+                       placeholder="ความยาว 8+ ตัว (A-Z, a-z, 0-9, อักขระพิเศษ)">
+                <!-- เกณฑ์ความปลอดภัยของรหัสผ่านแบบ Real-time -->
+                <div class="mt-2 p-2.5 bg-slate-50 border border-slate-200 text-[11px] font-mono space-y-1">
+                    <div class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">เกณฑ์ความปลอดภัยรหัสผ่าน:</div>
+                    <div class="flex items-center space-x-1.5" id="regRuleLen">
+                        <span class="w-1.5 h-1.5 bg-slate-400 reg-rule-dot"></span>
+                        <span class="reg-rule-txt text-slate-500">ความยาวอย่างน้อย 8 ตัวอักษร</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5" id="regRuleUpper">
+                        <span class="w-1.5 h-1.5 bg-slate-400 reg-rule-dot"></span>
+                        <span class="reg-rule-txt text-slate-500">ตัวพิมพ์ใหญ่ (A - Z) อย่างน้อย 1 ตัว</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5" id="regRuleLower">
+                        <span class="w-1.5 h-1.5 bg-slate-400 reg-rule-dot"></span>
+                        <span class="reg-rule-txt text-slate-500">ตัวพิมพ์เล็ก (a - z) อย่างน้อย 1 ตัว</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5" id="regRuleDigit">
+                        <span class="w-1.5 h-1.5 bg-slate-400 reg-rule-dot"></span>
+                        <span class="reg-rule-txt text-slate-500">ตัวเลข (0 - 9) อย่างน้อย 1 ตัว</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5" id="regRuleSpecial">
+                        <span class="w-1.5 h-1.5 bg-slate-400 reg-rule-dot"></span>
+                        <span class="reg-rule-txt text-slate-500">อักขระพิเศษ (!@#$%^&*_-) อย่างน้อย 1 ตัว</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 font-mono">
+                    อีเมล (สำหรับรับรหัส OTP): <span class="text-rose-600">*</span>
+                </label>
+                <input type="email" name="email" required 
+                       class="w-full px-3.5 py-2.5 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-mono focus:border-cheero-500"
+                       placeholder="your_email@example.com">
+                <span class="text-[10px] text-slate-500 mt-1 block font-mono">ระบบจะส่งรหัส OTP 6 หลักไปยังอีเมลนี้</span>
+            </div>
+
+            <!-- เพิ่มช่องเลือกจังหวัดของผู้จอง -->
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 font-mono">
+                    จังหวัดของผู้จอง (PROVINCE): <span class="text-rose-600">*</span>
+                </label>
+                <select name="province" required
+                        class="w-full px-3.5 py-2.5 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-mono focus:border-cheero-500">
+                    {% for p in provinces %}
+                        <option value="{{ p }}" {% if p == 'ขอนแก่น' %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
+                </select>
+                <span class="text-[10px] text-slate-500 mt-1 block font-normal">ระบุจังหวัดต้นทางของผู้จัดงานหรือทีม เพื่อความสะดวกในการติดต่อและจัดสรรสิ่งอำนวยความสะดวก</span>
+            </div>
+
+            <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 border border-sky-600 transition text-xs sm:text-sm mt-3 uppercase tracking-wider cursor-pointer font-mono shadow-2xs">
+                ส่งรหัส OTP ไปยังอีเมล
+            </button>
+        </form>
+
+        {% elif step == 2 %}
+        <form method="POST" class="space-y-5">
+            <input type="hidden" name="action" value="verify_otp">
+            
+            <!-- กรอบสไตล์บิล / ใบเสร็จยืนยันตัวตน เรียบง่าย ข้อความเฉพาะคำจำเป็น -->
+            <div class="p-4 bg-slate-50 border border-slate-300 font-mono text-xs text-slate-700">
+                <div class="text-center border-b border-dashed border-slate-300 pb-2.5 mb-2.5">
+                    <span class="font-bold text-slate-900 uppercase tracking-wider block">VERIFICATION SLIP</span>
+                    <span class="text-[11px] text-slate-500">ONE-TIME PASSWORD (OTP)</span>
+                </div>
+                
+                <div class="space-y-1.5 text-[11px]">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">ปลายทาง (EMAIL):</span>
+                        <span class="font-bold text-slate-800 truncate max-w-[200px]">{{ email }}</span>
+                    </div>
+                    {% if province %}
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">จังหวัด (PROVINCE):</span>
+                        <span class="font-bold text-cheero-600">{{ province }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">อายุการใช้งาน:</span>
+                        <span class="font-bold text-slate-800">5 นาที</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 text-center font-mono">
+                    กรอกรหัส OTP 6 หลัก:
+                </label>
+                <input type="text" name="otp" maxlength="6" required autofocus placeholder="------"
+                       class="w-full text-center tracking-[0.5em] text-2xl sm:text-3xl font-black font-mono py-3 border-2 border-slate-800 text-slate-900 outline-none transition bg-white placeholder-slate-300 focus:border-cheero-600">
+            </div>
+
+            <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 border border-sky-600 transition text-xs sm:text-sm uppercase tracking-wider cursor-pointer font-mono shadow-2xs">
+                ยืนยันรหัส OTP (CONFIRM) [->]
+            </button>
+
+            <div class="text-center pt-1">
+                <a href="/register" class="text-xs text-slate-500 hover:text-slate-800 underline font-mono">
+                    [<-] ขอรหัสใหม่ / แก้ไขข้อมูล
+                </a>
+            </div>
+        </form>
+        {% endif %}
+
+        <div class="mt-6 pt-5 border-t border-slate-200 text-center text-xs text-slate-600">
+            มีบัญชีผู้ใช้งานอยู่แล้ว? 
+            <a href="/login" class="text-cheero-600 font-bold hover:underline font-mono ml-1">เข้าสู่ระบบ</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pwdInput = document.getElementById('regPagePassword');
+    if (pwdInput) {
+        pwdInput.addEventListener('input', function() {
+            const val = this.value;
+            const checks = [
+                { id: 'regRuleLen', ok: val.length >= 8 },
+                { id: 'regRuleUpper', ok: /[A-Z]/.test(val) },
+                { id: 'regRuleLower', ok: /[a-z]/.test(val) },
+                { id: 'regRuleDigit', ok: /[0-9]/.test(val) },
+                { id: 'regRuleSpecial', ok: /[^a-zA-Z0-9]/.test(val) }
+            ];
+            checks.forEach(function(c) {
+                const el = document.getElementById(c.id);
+                if (el) {
+                    const dot = el.querySelector('.reg-rule-dot');
+                    const txt = el.querySelector('.reg-rule-txt');
+                    if (c.ok) {
+                        if (dot) dot.className = 'w-1.5 h-1.5 bg-emerald-600 reg-rule-dot';
+                        if (txt) txt.className = 'reg-rule-txt text-emerald-700 font-bold';
+                    } else {
+                        if (dot) dot.className = 'w-1.5 h-1.5 bg-slate-400 reg-rule-dot';
+                        if (txt) txt.className = 'reg-rule-txt text-slate-500';
+                    }
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

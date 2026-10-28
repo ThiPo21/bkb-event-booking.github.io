@@ -1,0 +1,618 @@
+{% extends "base.html" %}
+
+{% block title %}ปรับแต่งออพชั่น &amp; ยืนยันการจอง - {{ package.name }} | BKB EVENT BOOKING{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
+    <!-- กล่องฟอร์มแบบเหลี่ยม เรียบ คมชัด (Sharp & Minimalist UX/UI) -->
+    <div class="bg-white p-5 sm:p-8 border border-slate-300 shadow-2xs">
+        <!-- ป้ายหัวข้อ -->
+        <div class="border-b border-slate-200 pb-5 mb-6">
+            <span class="text-[10px] sm:text-xs font-bold text-cheero-700 bg-sky-50 px-2.5 py-1 border border-sky-200 uppercase font-mono tracking-wider">
+                STEP 2 OF 2: CUSTOMIZE &amp; BOOK
+            </span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-2 sm:mt-3 tracking-tight">ปรับแต่งออพชั่นและส่งคำขอจอง</h2>
+            <div class="mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-t border-slate-100 pt-2">
+                <span class="text-sm sm:text-base font-bold text-slate-800">{{ package.name }}</span>
+                <span class="text-xl sm:text-2xl font-black text-cheero-600 font-mono">฿{{ "{:,}".format(package.price) }}</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1 font-normal">{{ package.description }}</p>
+        </div>
+
+        <form method="POST" id="bookingForm" enctype="multipart/form-data" class="space-y-5 sm:space-y-6">
+            <!-- 1. วันที่จัดงาน -->
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 font-mono">
+                    1. วันที่ต้องการจัดงานแข่งขัน: <span class="text-rose-600">*</span>
+                </label>
+                <input type="date" name="event_date" required id="bookingDateInput"
+                       class="w-full px-4 py-3 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-mono focus:border-cheero-500">
+                
+                <!-- กล่องแจ้งเตือนเมื่อเลือกวันที่ที่คิวเต็มแล้ว (Sharp Alert Box) -->
+                <div id="dateConflictAlert" class="mt-2.5 p-3 bg-rose-50 border border-rose-300 text-rose-800 text-xs hidden">
+                    <div class="flex items-center space-x-2 font-bold font-mono">
+                        <span class="w-2 h-2 bg-rose-600 flex-shrink-0"></span>
+                        <span id="dateConflictMsg">ขออภัย วันที่นี้ได้รับการอนุมัติแล้ว (คิวเต็ม) กรุณาเลือกวันอื่น</span>
+                    </div>
+                </div>
+
+                <p class="text-[11px] text-slate-500 mt-1.5 font-normal">
+                    * ระบบจะปิดการจองสำหรับวันที่ได้รับการอนุมัติไปแล้วโดยอัตโนมัติ เพื่อป้องกันการจองคิวซ้อน
+                </p>
+            </div>
+
+            <!-- 2. ช่วงเวลาจัดงานแข่งขัน -->
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 font-mono">
+                    2. เลือกช่วงเวลาจัดงานแข่งขัน (EVENT TIME SLOT): <span class="text-rose-600">*</span>
+                </label>
+                <select name="event_time" required
+                        class="w-full px-4 py-3 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-mono focus:border-cheero-500">
+                    {% for slot in time_slots %}
+                        <option value="{{ slot.name }}" {% if slot.id == 'fullday' %}selected{% endif %}>
+                            {{ slot.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="text-[11px] text-slate-500 mt-1.5 font-normal">
+                    * เลือกช่วงเวลาแข่งขันที่ต้องการ หรือระบุเวลาเพิ่มเติมในช่องหมายเหตุ
+                </p>
+            </div>
+
+            <!-- 3. สนามที่ต้องการใช้แข่งขันภายในขอนแก่น & ยิม มข. -->
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 font-mono">
+                    3. เลือกสนามแข่งขัน (จังหวัดขอนแก่น &amp; โรงยิมเนเซียม มหาวิทยาลัยขอนแก่น): <span class="text-rose-600">*</span>
+                </label>
+                <select name="venue" id="venueSelect" required
+                        class="w-full px-4 py-3 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-sans focus:border-cheero-500 font-medium">
+                    {% for v in venues %}
+                        <option value="{{ v.name }}" data-zone="{{ v.zone }}" data-type="{{ v.type }}" data-cap="{{ v.capacity }}" {% if loop.first %}selected{% endif %}>
+                            [{{ v.zone }}] {{ v.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <!-- การ์ดแสดงข้อมูลรายละเอียดสนามที่เลือกแบบเรียลไทม์ -->
+                <div id="venueDetailBox" class="mt-2.5 p-3.5 bg-slate-50 border border-slate-300 text-xs font-mono space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500 uppercase text-[10px]">โซนพื้นที่:</span>
+                        <span id="venueZoneDisplay" class="font-bold text-slate-800">มหาวิทยาลัยขอนแก่น</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500 uppercase text-[10px]">ลักษณะสนาม:</span>
+                        <span id="venueTypeDisplay" class="font-bold text-cheero-600 text-right max-w-[280px] truncate">ในร่ม ติดแอร์ / พื้นไม้ปาร์เก้มาตรฐาน FIBA</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500 uppercase text-[10px]">ความจุผู้ชม:</span>
+                        <span id="venueCapDisplay" class="font-bold text-slate-800">อัฒจันทร์ 1,500 ที่นั่ง</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. ออพชั่นเสริมเพิ่มเติม -->
+            <div class="border-t border-slate-200 pt-5">
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 font-mono">
+                    4. เลือกออพชั่นเสริมเพิ่มเติม (อุปกรณ์ &amp; ทีมงาน):
+                </label>
+                <div class="space-y-2.5">
+                    <label class="flex items-start space-x-3 p-3.5 border border-slate-200 bg-slate-50 hover:bg-sky-50/50 transition cursor-pointer">
+                        <input type="checkbox" name="options" value="ref_extra" data-price="1500" class="option-check mt-1 h-4 w-4 text-cheero-600 border-slate-300 focus:ring-0 flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center gap-1">
+                                <span class="font-bold text-xs sm:text-sm text-slate-900">เพิ่มกรรมการตัดสินเสริม</span>
+                                <span class="text-xs font-bold text-cheero-600 font-mono flex-shrink-0">+1,500 บ.</span>
+                            </div>
+                            <span class="text-[11px] sm:text-xs text-slate-500 block mt-0.5 font-normal">เพิ่มผู้ตัดสิน 1 ท่าน เพื่อการควบคุมเกมที่ละเอียด</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start space-x-3 p-3.5 border border-slate-200 bg-slate-50 hover:bg-sky-50/50 transition cursor-pointer">
+                        <input type="checkbox" name="options" value="live_stream" data-price="3000" class="option-check mt-1 h-4 w-4 text-cheero-600 border-slate-300 focus:ring-0 flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center gap-1">
+                                <span class="font-bold text-xs sm:text-sm text-slate-900">Live Streaming Full HD</span>
+                                <span class="text-xs font-bold text-cheero-600 font-mono flex-shrink-0">+3,000 บ.</span>
+                            </div>
+                            <span class="text-[11px] sm:text-xs text-slate-500 block mt-0.5 font-normal">ถ่ายทอดสด FB / YT สกอร์บอร์ดดิจิทัล</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start space-x-3 p-3.5 border border-slate-200 bg-slate-50 hover:bg-sky-50/50 transition cursor-pointer">
+                        <input type="checkbox" name="options" value="water_snack" data-price="1000" class="option-check mt-1 h-4 w-4 text-cheero-600 border-slate-300 focus:ring-0 flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center gap-1">
+                                <span class="font-bold text-xs sm:text-sm text-slate-900">ชุดน้ำดื่ม &amp; อาหารว่าง</span>
+                                <span class="text-xs font-bold text-cheero-600 font-mono flex-shrink-0">+1,000 บ.</span>
+                            </div>
+                            <span class="text-[11px] sm:text-xs text-slate-500 block mt-0.5 font-normal">บริการน้ำดื่มลังและเกลือแร่เย็นสำหรับทุกทีม</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 5. การชำระเงินมัดจำผ่านพร้อมเพย์ 091-830-3564 (PROMPTPAY DEPOSIT PAYMENT) -->
+            <div class="border-t border-slate-200 pt-5">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">
+                        5. ชำระเงินมัดจำผ่านพร้อมเพย์ (091-830-3564): <span class="text-rose-600">*</span>
+                    </label>
+                    <span class="text-[10px] sm:text-xs font-bold font-mono px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-300">
+                        {% if package.id == 'test' %}มัดจำทดสอบ 1.00 บาท{% else %}มัดจำ 5% ของยอดรวม{% endif %}
+                    </span>
+                </div>
+
+                <div class="p-4 sm:p-5 bg-slate-50 border border-slate-300 space-y-4">
+                    <!-- คำชี้แจงและข้อมูลพร้อมเพย์ -->
+                    <!-- บัตรคิวอาร์โค้ดพร้อมเพย์สไตล์ทางการ (Thai PromptPay Official QR Card พร้อมระบบคำนวณราคาไดนามิก) -->
+                    <div class="bg-white p-4 sm:p-5 border border-slate-200 space-y-4">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                            <div class="space-y-1 text-xs">
+                                <div class="text-slate-500 font-mono text-[11px] uppercase font-bold">ช่องทางรับเงินพร้อมเพย์ (PROMPTPAY):</div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-lg sm:text-xl font-black text-slate-900 font-mono tracking-wider">{{ promptpay_number }}</span>
+                                    <button type="button" onclick="copyPromptPay()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-mono font-bold border border-slate-900 transition cursor-pointer">
+                                        คัดลอกเลขพร้อมเพย์
+                                    </button>
+                                </div>
+                                <div class="text-slate-600 font-sans">ชื่อบัญชี: <b>ฝ่ายการเงิน BKB EVENT BOOKING</b></div>
+                            </div>
+                            <div class="text-left sm:text-right sm:border-l sm:border-slate-200 sm:pl-4">
+                                <div class="text-[11px] text-slate-500 font-mono uppercase font-bold">ยอดเงินมัดจำที่ต้องชำระ:</div>
+                                <div class="text-xl sm:text-2xl font-black text-emerald-600 font-mono">
+                                    ฿<span id="displayDepositPrice">{{ "{:,.2f}".format(deposit_amount) }}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 font-mono">
+                                    {% if package.id == 'test' %}(โหมดทดสอบระบบ โอนเพียง 1.00 บาท){% else %}(คำนวณมัดจำ 5% ของยอดรวมอัตโนมัติ){% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- แถบเลือกสลับยอดเงินที่จะฝังใน QR Code (ชำระมัดจำ 5% หรือ ชำระเต็มจำนวน 100%) -->
+                        <div class="bg-slate-100 p-2.5 border border-slate-300 flex flex-col sm:flex-row items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-slate-800 font-mono uppercase">
+                                เลือกยอดเงินที่ต้องการฝังใน QR Code:
+                            </span>
+                            <div class="flex items-center space-x-1 w-full sm:w-auto">
+                                <button type="button" id="payModeDepositBtn" onclick="setPaymentQrMode('deposit')"
+                                        class="flex-1 sm:flex-initial px-3 py-1.5 text-xs font-mono font-bold transition border border-slate-900 bg-slate-900 text-white cursor-pointer">
+                                    [•] ยอดมัดจำ ({% if package.id == 'test' %}1 บาท{% else %}5%{% endif %})
+                                </button>
+                                <button type="button" id="payModeFullBtn" onclick="setPaymentQrMode('full')"
+                                        class="flex-1 sm:flex-initial px-3 py-1.5 text-xs font-mono font-bold transition border border-slate-300 bg-white text-slate-700 hover:bg-slate-200 cursor-pointer">
+                                    [ ] ยอดรวมเต็มจำนวน (100%)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- บัตรคิวอาร์โค้ดพร้อมเพย์สไตล์ทางการ (Thai PromptPay Official QR Card) -->
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-6 pt-2">
+                            
+                            <!-- กล่องการ์ด QR Code สไตล์ Thai QR Payment / PromptPay -->
+                            <div class="w-full max-w-[270px] bg-white border-2 border-slate-900 p-0 shadow-md">
+                                <!-- ส่วนหัวสีน้ำเงิน PromptPay แท้ (#0B3C61) -->
+                                <div class="bg-[#0B3C61] text-white p-3 text-center border-b border-slate-900">
+                                    <div class="flex items-center justify-center mb-0.5">
+                                        <span class="text-xs font-black tracking-wider uppercase font-mono">THAI QR PAYMENT</span>
+                                    </div>
+                                    <div class="text-[11px] font-bold text-sky-200 uppercase font-mono">พร้อมเพย์ (PROMPTPAY)</div>
+                                </div>
+
+                                <!-- พื้นที่ภาพ QR Code คมชัดสูง ปรับราคาไดนามิกอัตโนมัติ -->
+                                <div class="p-4 bg-white relative flex flex-col items-center justify-center">
+                                    <div id="qrLoadingOverlay" class="absolute inset-0 bg-white/90 backdrop-blur-xs hidden flex flex-col items-center justify-center z-10 space-y-1">
+                                        <div class="w-6 h-6 border-2 border-slate-900 border-t-transparent animate-spin"></div>
+                                        <span class="text-[10px] font-mono font-bold text-slate-800">กำลังอัปเดตราคาใน QR...</span>
+                                    </div>
+
+                                    <div class="w-48 h-48 sm:w-52 sm:h-52 bg-white flex items-center justify-center border border-slate-200 p-1" id="promptpaySvgBox">
+                                        {% if promptpay_png_b64 %}
+                                            <img id="promptpayQrImg" src="{{ promptpay_png_b64 }}" alt="PromptPay QR Code" class="w-full h-full object-contain">
+                                        {% else %}
+                                            {{ promptpay_svg | safe }}
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- ป้ายแสดงราคาที่ฝังอยู่ในคิวอาร์โค้ดจริง -->
+                                    <div class="mt-3 w-full text-center bg-slate-50 border border-slate-300 py-1.5 px-2">
+                                        <span class="text-[10px] font-mono text-slate-500 uppercase block font-bold">ราคาใน QR Code นี้:</span>
+                                        <span class="text-xl sm:text-2xl font-black font-mono text-emerald-600 block tracking-tight">
+                                            ฿<span id="qrEmbeddedAmountDisplay">{{ "{:,.2f}".format(deposit_amount) }}</span>
+                                        </span>
+                                        <span class="text-[9px] text-slate-500 font-sans block mt-0.5">
+                                            สแกนแล้วยอดเงินจะระบุอัตโนมัติ
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- ส่วนท้ายการ์ด -->
+                                <div class="bg-slate-100 p-2 text-center border-t border-slate-300 text-[10px] font-mono text-slate-600">
+                                    <span>บัญชี: ฝ่ายการเงิน BKB EVENT BOOKING</span><br>
+                                    <span class="font-bold text-slate-900">พร้อมเพย์: 091-830-3564</span>
+                                </div>
+                            </div>
+
+                            <!-- คำอธิบายขั้นตอนอย่างละเอียด -->
+                            <div class="text-xs text-slate-600 space-y-2 leading-relaxed font-sans max-w-sm">
+                                <div class="font-bold text-slate-900 text-sm border-b border-slate-200 pb-1">
+                                    ขั้นตอนการสแกนจ่ายเงิน:
+                                </div>
+                                <div class="space-y-1.5 font-sans">
+                                    <div><b>1. เปิดแอปพลิเคชันธนาคารของคุณ</b> (เช่น K PLUS, SCB EASY, Krungthai NEXT ฯลฯ)</div>
+                                    <div><b>2. เลือกเมนู "สแกน" หรือ "สแกนจ่าย"</b> แล้วเล็งกล้องไปที่ QR Code ด้านซ้ายนี้</div>
+                                    <div><b>3. ระบบธนาคารจะใส่ยอดเงินให้อัตโนมัติ</b> ตรงตามราคาที่คุณเลือกไว้</div>
+                                    <div><b>4. ตรวจสอบชื่อบัญชี</b> "ฝ่ายการเงิน BKB EVENT BOOKING" หรือหมายเลข <b>091-830-3564</b> แล้วกดยืนยันโอนเงิน</div>
+                                    <div><b>5. บันทึกสภาพสลิป</b> แล้วนำมาแนบในกล่องด้านล่างนี้</div>
+                                </div>
+                                <div class="text-[11px] text-emerald-800 bg-emerald-50 p-2.5 border border-emerald-300 mt-2 font-mono">
+                                    * ราคาใน QR Code จะคำนวณและอัปเดตใหม่ทันทีเมื่อคุณเลือกออพชั่นเสริม หรือสลับยอดชำระ
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- กล่องแนบสลิปหลักฐานการโอนเงิน (Interactive Slip Attachment Dropzone) -->
+                    <div class="bg-white p-4 border border-slate-200">
+                        <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 font-mono">
+                            แนบสลิปการโอนเงิน (SLIP IMAGE): <span class="text-rose-600">*</span>
+                        </label>
+                        
+                        <div id="slipDropzone" onclick="document.getElementById('slipInput').click()" 
+                             class="border-2 border-dashed border-slate-300 hover:border-cheero-500 bg-slate-50 hover:bg-sky-50/30 p-6 text-center cursor-pointer transition">
+                            <input type="file" name="slip" id="slipInput" accept="image/jpeg,image/png,image/webp" required class="hidden">
+                            
+                            <!-- ข้อความแจ้งก่อนเลือกไฟล์ -->
+                            <div id="slipUploadPrompt" class="space-y-2">
+                                <svg class="w-8 h-8 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                                <div class="text-xs sm:text-sm font-bold text-slate-800">
+                                    คลิกที่นี่เพื่อเลือกภาพสลิป หรือลากไฟล์สลิปมาวางในกล่องนี้
+                                </div>
+                                <div class="text-[11px] text-slate-500 font-mono">
+                                    รองรับไฟล์รูปภาพ .JPG, .JPEG, .PNG, .WEBP (สลิปโอนเงินจาก Mobile Banking)
+                                </div>
+                                <div class="pt-1">
+                                    <span class="inline-block px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold font-mono border border-sky-600 shadow-2xs">
+                                        [เลือกไฟล์รูปภาพสลิป]
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- พรีวิวภาพสลิปเมื่อเลือกไฟล์เรียบร้อยแล้ว -->
+                            <div id="slipPreviewWrapper" class="hidden space-y-3">
+                                <div class="text-xs font-bold text-emerald-800 bg-emerald-50 py-1 px-3 border border-emerald-300 inline-block font-mono">
+                                    แนบไฟล์สลิปเรียบร้อย: <span id="slipFileNameText" class="font-normal text-slate-700"></span>
+                                </div>
+                                <div class="max-w-xs mx-auto">
+                                    <img id="slipPreviewImg" src="" alt="สลิปโอนเงิน" class="max-h-56 mx-auto border border-slate-300 object-contain bg-white p-1 shadow-2xs">
+                                </div>
+                                <button type="button" onclick="event.stopPropagation(); document.getElementById('slipInput').click();" class="text-xs text-sky-700 hover:underline font-bold font-mono">
+                                    [คลิกเพื่อเปลี่ยนรูปสลิป / เลือกไฟล์ใหม่]
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] text-slate-500 mt-2 font-normal">
+                            * กรุณาแนบภาพสลิปที่เห็นวันที่ เวลา และยอดเงินโอนชัดเจน เพื่อความรวดเร็วในการตรวจสอบคิวงาน
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. หมายเหตุ -->
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 font-mono">
+                    6. หมายเหตุเพิ่มเติมถึงผู้จัด (ถ้ามี):
+                </label>
+                <textarea name="note" rows="3" class="w-full px-4 py-2.5 border border-slate-300 bg-white text-xs sm:text-sm outline-none transition font-normal focus:border-cheero-500" placeholder="เช่น ขอเริ่มคู่แรกช่วง 10:00 น. หรือข้อกำหนดพิเศษ..."></textarea>
+            </div>
+
+            <!-- กล่องสรุปราคารวม สไตล์ทางการ สะอาดตา สว่าง อ่านง่าย คมชัด (High-Contrast Light Minimalist) -->
+            <div class="bg-white border-2 border-slate-300 p-4 sm:p-5 space-y-2.5 shadow-2xs">
+                <div class="flex items-center justify-between text-xs sm:text-sm font-mono text-slate-700 pb-2 border-b border-slate-200">
+                    <span class="font-bold text-slate-700">ราคารวมบริการทั้งหมด:</span>
+                    <span class="font-black text-slate-900 text-base sm:text-lg">฿<span id="displayTotalPrice">{{ "{:,}".format(package.price) }}</span></span>
+                </div>
+                <div class="flex items-center justify-between text-xs sm:text-sm font-mono bg-emerald-50 text-emerald-950 p-3 border border-emerald-300">
+                    <span class="font-bold">หัก ยอดเงินมัดจำที่ต้องชำระตอนนี้ ({% if package.id == 'test' %}ทดสอบ 1 บ.{% else %}5%{% endif %}):</span>
+                    <span class="font-black text-emerald-700 text-base sm:text-lg">฿<span id="displayDepositBadge">{{ "{:,.2f}".format(deposit_amount) }}</span></span>
+                </div>
+                <div class="flex items-center justify-between text-xs sm:text-sm font-mono bg-amber-50/60 text-slate-900 p-3 border border-amber-300">
+                    <span class="font-bold text-amber-950">ยอดคงค้างชำระในวันแข่งขันจริง:</span>
+                    <span class="font-black text-amber-900 text-lg sm:text-xl">฿<span id="displayRemainingPrice">{{ "{:,.2f}".format(package.price - deposit_amount) }}</span></span>
+                </div>
+            </div>
+
+            <!-- กล่องแจ้งเตือนนโยบายคุ้มครองและการคืนเงินมัดจำ (REFUND POLICY GUARANTEE) -->
+            <div class="p-4 bg-sky-50 border border-sky-300 text-slate-800 text-xs space-y-2">
+                <div class="flex items-center space-x-2 font-mono font-bold text-sky-950 text-xs sm:text-sm">
+                    <span class="w-2 h-2 bg-sky-700 flex-shrink-0"></span>
+                    <span>เงื่อนไขการคุ้มครองและการคืนเงินมัดจำ (REFUND GUARANTEE)</span>
+                </div>
+                <p class="text-slate-700 leading-relaxed font-sans text-xs sm:text-[13px]">
+                    หากท่านชำระเงินมัดจำแล้ว และทางผู้จัดปฏิเสธการจองเนื่องจากกรณีวันดังกล่าวบุคลากรหรือกรรมการตัดสินไม่เพียงพอ <b>ทางผู้จัดจะทำการคืนเงินมัดจำเต็มจำนวนทุกกรณี ภายในเวลาทำการ 3 - 5 วัน</b>
+                </p>
+                <label class="flex items-start space-x-2.5 pt-1.5 cursor-pointer select-none border-t border-sky-200">
+                    <input type="checkbox" id="acceptRefundPolicy" name="accept_refund_policy" required class="mt-0.5 w-4 h-4 text-sky-600 border-slate-400 focus:ring-sky-500 cursor-pointer">
+                    <span class="text-[11px] sm:text-xs font-bold text-slate-900">
+                        ข้าพเจ้ารับทราบและยอมรับเงื่อนไขการจอง รวมถึงนโยบายการคืนเงินมัดจำกรณีผู้จัดปฏิเสธการจอง (คืนเงินเต็มจำนวน 3-5 วันทำการ) <span class="text-rose-600">*</span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row items-center gap-2.5 sm:gap-3 pt-2">
+                <a href="/packages" class="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold border border-slate-300 transition text-center text-xs sm:text-sm uppercase tracking-wider font-mono">
+                    [<-] ย้อนกลับ
+                </a>
+                <button type="submit" id="submitBookingBtn" class="w-full sm:flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-6 border border-sky-600 transition text-center text-xs sm:text-sm uppercase tracking-wider cursor-pointer font-mono shadow-2xs">
+                    ยืนยันการชำระเงินมัดจำ &amp; ส่งคำขอจอง
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const packageId = "{{ package.id }}";
+    const basePrice = {{ package.price }};
+    const checkboxes = document.querySelectorAll('.option-check');
+    const displayTotal = document.getElementById('displayTotalPrice');
+    const displayDepositPrice = document.getElementById('displayDepositPrice');
+    const displayDepositBadge = document.getElementById('displayDepositBadge');
+    const displayRemainingPrice = document.getElementById('displayRemainingPrice');
+    const dateInput = document.getElementById('bookingDateInput');
+    const conflictAlert = document.getElementById('dateConflictAlert');
+    const conflictMsg = document.getElementById('dateConflictMsg');
+    const submitBtn = document.getElementById('submitBookingBtn');
+    const bookingForm = document.getElementById('bookingForm');
+    const venueSelect = document.getElementById('venueSelect');
+    const venueZoneDisplay = document.getElementById('venueZoneDisplay');
+    const venueTypeDisplay = document.getElementById('venueTypeDisplay');
+    const venueCapDisplay = document.getElementById('venueCapDisplay');
+    const slipInput = document.getElementById('slipInput');
+    const slipPreviewWrapper = document.getElementById('slipPreviewWrapper');
+    const slipPreviewImg = document.getElementById('slipPreviewImg');
+    const promptpaySvgBox = document.getElementById('promptpaySvgBox');
+
+    // รายการวันที่ได้รับการอนุมัติแล้ว (คิวเต็ม) ส่งตรงมาจาก SQLite
+    const confirmedDates = {{ (confirmed_dates or []) | tojson }};
+
+    // ป้องกันการเลือกวันย้อนหลังในอดีต
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (dateInput) {
+        dateInput.setAttribute('min', todayStr);
+    }
+
+    function checkDateAvailability() {
+        const selected = (dateInput.value || '').trim();
+        if (!selected) {
+            conflictAlert.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            return true;
+        }
+
+        if (confirmedDates.includes(selected)) {
+            conflictMsg.textContent = `ขออภัย วันที่ ${selected} มีคิวแข่งขันได้รับการอนุมัติแล้ว (คิวเต็ม) กรุณาเลือกวันอื่น`;
+            conflictAlert.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            return false;
+        } else {
+            conflictAlert.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            return true;
+        }
+    }
+
+    if (dateInput) {
+        dateInput.addEventListener('change', checkDateAvailability);
+        dateInput.addEventListener('input', checkDateAvailability);
+    }
+
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', function(e) {
+            if (!checkDateAvailability()) {
+                e.preventDefault();
+                return false;
+            }
+            if (slipInput && !slipInput.files.length) {
+                alert('กรุณาแนบภาพสลิปหลักฐานการโอนเงินมัดจำ');
+                e.preventDefault();
+                return false;
+            }
+            const acceptPolicy = document.getElementById('acceptRefundPolicy');
+            if (acceptPolicy && !acceptPolicy.checked) {
+                alert('กรุณาทำเครื่องหมายยอมรับเงื่อนไขการจองและนโยบายการคืนเงินมัดจำก่อนดำเนินการ');
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
+    // โหมดการฝังยอดเงินใน QR Code ('deposit' = เงินมัดจำ, 'full' = ยอดรวมเต็มจำนวน)
+    let currentQrPaymentMode = 'deposit';
+    const qrEmbeddedAmountDisplay = document.getElementById('qrEmbeddedAmountDisplay');
+    const qrLoadingOverlay = document.getElementById('qrLoadingOverlay');
+    const payModeDepositBtn = document.getElementById('payModeDepositBtn');
+    const payModeFullBtn = document.getElementById('payModeFullBtn');
+
+    function setPaymentQrMode(mode) {
+        currentQrPaymentMode = mode;
+        if (mode === 'deposit') {
+            if (payModeDepositBtn) {
+                payModeDepositBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 text-xs font-mono font-bold transition border border-slate-900 bg-slate-900 text-white cursor-pointer";
+                payModeDepositBtn.textContent = "[•] ยอดมัดจำ (" + (packageId === 'test' ? '1 บาท' : '5%') + ")";
+            }
+            if (payModeFullBtn) {
+                payModeFullBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 text-xs font-mono font-bold transition border border-slate-300 bg-white text-slate-700 hover:bg-slate-200 cursor-pointer";
+                payModeFullBtn.textContent = "[ ] ยอดรวมเต็มจำนวน (100%)";
+            }
+        } else {
+            if (payModeFullBtn) {
+                payModeFullBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 text-xs font-mono font-bold transition border border-slate-900 bg-slate-900 text-white cursor-pointer";
+                payModeFullBtn.textContent = "[•] ยอดรวมเต็มจำนวน (100%)";
+            }
+            if (payModeDepositBtn) {
+                payModeDepositBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 text-xs font-mono font-bold transition border border-slate-300 bg-white text-slate-700 hover:bg-slate-200 cursor-pointer";
+                payModeDepositBtn.textContent = "[ ] ยอดมัดจำ (" + (packageId === 'test' ? '1 บาท' : '5%') + ")";
+            }
+        }
+        calculateTotal();
+    }
+
+    // ตัวแปรเก็บ debounce timer สำหรับอัปเดต QR Code
+    let qrFetchTimeout = null;
+
+    function calculateTotal() {
+        let extra = 0;
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                extra += parseInt(cb.getAttribute('data-price') || 0);
+            }
+        });
+        const total = basePrice + extra;
+        displayTotal.textContent = total.toLocaleString();
+
+        let deposit = 1.0;
+        if (packageId === 'test') {
+            deposit = 1.0;
+        } else {
+            deposit = Math.max(1.0, Math.round(total * 0.05 * 100) / 100);
+        }
+
+        if (displayDepositPrice) displayDepositPrice.textContent = deposit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (displayDepositBadge) displayDepositBadge.textContent = deposit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        const remaining = Math.max(0, total - deposit);
+        if (displayRemainingPrice) displayRemainingPrice.textContent = remaining.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        // กำหนดยอดเงินจริงที่จะฝังใน QR Code
+        const targetQrAmount = (currentQrPaymentMode === 'full') ? total : deposit;
+        if (qrEmbeddedAmountDisplay) {
+            qrEmbeddedAmountDisplay.textContent = targetQrAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // ดึง QR Code PromptPay อัปเดตยอดเงินแบบไดนามิกพร้อมแสดงสถานะ Loading
+        if (qrFetchTimeout) clearTimeout(qrFetchTimeout);
+        if (qrLoadingOverlay) qrLoadingOverlay.classList.remove('hidden');
+
+        qrFetchTimeout = setTimeout(() => {
+            fetch(`/api/promptpay-qr?amount=${targetQrAmount}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.status === 'success') {
+                        const qrImg = document.getElementById('promptpayQrImg');
+                        if (qrImg && data.qr_image) {
+                            qrImg.src = data.qr_image;
+                        } else if (promptpaySvgBox && data.svg) {
+                            promptpaySvgBox.innerHTML = data.svg;
+                        }
+                    }
+                })
+                .catch(err => console.error('Error fetching promptpay QR:', err))
+                .finally(() => {
+                    if (qrLoadingOverlay) qrLoadingOverlay.classList.add('hidden');
+                });
+        }, 200);
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', calculateTotal));
+
+    // เรียกคำนวณและเตรียม QR Code ทันทีที่โหลดหน้าเสร็จ
+    calculateTotal();
+
+    // อัปเดตรายละเอียดสนามเมื่อเลือกตัวเลือก
+    if (venueSelect) {
+        venueSelect.addEventListener('change', function() {
+            const selectedOpt = venueSelect.options[venueSelect.selectedIndex];
+            if (selectedOpt) {
+                if (venueZoneDisplay) venueZoneDisplay.textContent = selectedOpt.getAttribute('data-zone') || '-';
+                if (venueTypeDisplay) venueTypeDisplay.textContent = selectedOpt.getAttribute('data-type') || '-';
+                if (venueCapDisplay) venueCapDisplay.textContent = selectedOpt.getAttribute('data-cap') || '-';
+            }
+        });
+    }
+
+    // ฟังก์ชันคัดลอกหมายเลขพร้อมเพย์ 0918303564
+    function copyPromptPay() {
+        const num = "0918303564";
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(num).then(() => {
+                alert('คัดลอกหมายเลขพร้อมเพย์ ' + num + ' เรียบร้อยแล้ว');
+            }).catch(() => {
+                prompt('คัดลอกหมายเลขพร้อมเพย์:', num);
+            });
+        } else {
+            prompt('คัดลอกหมายเลขพร้อมเพย์:', num);
+        }
+    }
+
+    // จัดการการแนบไฟล์สลิปและ Drag & Drop
+    const slipDropzone = document.getElementById('slipDropzone');
+    const slipUploadPrompt = document.getElementById('slipUploadPrompt');
+    const slipFileNameText = document.getElementById('slipFileNameText');
+
+    function handleSlipFile(file) {
+        if (!file) return;
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('กรุณาเลือกไฟล์รูปภาพประเภท .JPG, .PNG หรือ .WEBP เท่านั้น');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (slipPreviewImg) {
+                slipPreviewImg.src = e.target.result;
+            }
+            if (slipFileNameText) {
+                slipFileNameText.textContent = file.name;
+            }
+            if (slipPreviewWrapper) slipPreviewWrapper.classList.remove('hidden');
+            if (slipUploadPrompt) slipUploadPrompt.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    if (slipDropzone) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+            slipDropzone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                slipDropzone.classList.add('border-emerald-500', 'bg-emerald-50/50');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            slipDropzone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                slipDropzone.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+            }, false);
+        });
+
+        slipDropzone.addEventListener('drop', function(e) {
+            const dt = e.dataTransfer;
+            if (dt && dt.files && dt.files.length > 0) {
+                slipInput.files = dt.files;
+                handleSlipFile(dt.files[0]);
+            }
+        }, false);
+    }
+
+    if (slipInput) {
+        slipInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                handleSlipFile(this.files[0]);
+            } else {
+                if (slipPreviewWrapper) slipPreviewWrapper.classList.add('hidden');
+                if (slipUploadPrompt) slipUploadPrompt.classList.remove('hidden');
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}มาตรฐานสนาม & บริการจัดการแข่งขัน{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14">
+    <!-- ส่วนหัวหน้า สบายตา สะอาดตา -->
+    <div class="border-b border-sky-100 pb-5 mb-8 sm:mb-12">
+        <div class="flex items-center space-x-2 mb-2">
+            <span class="bg-sky-100 text-cheero-700 text-xs font-bold uppercase px-3 py-1 rounded-full border border-sky-200">
+                FACILITIES &amp; QUALITY STANDARDS
+            </span>
+            <span class="w-1.5 h-1.5 rounded-full bg-cheero-500"></span>
+            <span class="text-xs text-slate-400 font-medium">มาตรฐานระดับสากล</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
+            มาตรฐานสนาม &amp; บริการจัดการแข่งขัน
+        </h1>
+        <p class="text-slate-500 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
+            เราให้ความสำคัญกับทุกรายละเอียดเพื่อให้นักกีฬาและผู้จัดงานได้รับประสบการณ์ที่ดีที่สุด
+        </p>
+    </div>
+
+    <!-- 4 เสาหลักของมาตรฐาน สบายตา เส้นบาง -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-14">
+        <!-- 1. สนาม FIBA -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl border border-sky-100 shadow-xs flex flex-col sm:flex-row gap-5 items-start hover:shadow-md transition">
+            <span class="w-14 h-14 rounded-2xl bg-sky-100 text-cheero-500 flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden p-2">
+                <img src="{{ url_for('static', filename='images/standards/fiba.png') }}" alt="FIBA Court" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                <svg class="w-8 h-8 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </span>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">1. พื้นสนามมาตรฐานสากล (FIBA Standard)</h3>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4 font-normal">
+                    พื้นสนามไม้ปาร์เก้เกรดแข่งขันพร้อมชั้นซับแรงกระแทก ช่วยปกป้องข้อต่อและลดการบาดเจ็บของนักกีฬา ห่วงบาสเกตบอลสปริงมาตรฐานปรับระดับได้ พร้อมระบบไฟ LED ส่องสว่างรอบทิศทาง 800+ Lux
+                </p>
+                <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-cheero-700">
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">พื้นไม้ปาร์เก้ซับแรง</span>
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">ห่วงสปริง FIBA</span>
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">ไฟส่องสว่าง 800+ LUX</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. กรรมการสมาคม -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl border border-sky-100 shadow-xs flex flex-col sm:flex-row gap-5 items-start hover:shadow-md transition">
+            <span class="w-14 h-14 rounded-2xl bg-sky-100 text-cheero-500 flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden p-2">
+                <img src="{{ url_for('static', filename='images/standards/referee.png') }}" alt="Referees" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                <svg class="w-8 h-8 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </span>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">2. กรรมการตัดสิน &amp; โต๊ะเทคนิคสมาคมฯ</h3>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4 font-normal">
+                    ทีมผู้ตัดสินที่มีใบรับรองและใบอนุญาตจากสมาคมกีฬาบาสเกตบอลแห่งประเทศไทย ควบคุมการแข่งขันอย่างยุติธรรม พร้อมโต๊ะเทคนิคจับเวลา 24 วินาที และบันทึกสถิติแบบมืออาชีพ
+                </p>
+                <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-cheero-700">
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">ผู้ตัดสินสมาคมฯ</span>
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">ป้ายคะแนนดิจิทัล</span>
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">SHOT CLOCK 24S</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Live Streaming -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl border border-sky-100 shadow-xs flex flex-col sm:flex-row gap-5 items-start hover:shadow-md transition">
+            <span class="w-14 h-14 rounded-2xl bg-sky-100 text-cheero-500 flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden p-2">
+                <img src="{{ url_for('static', filename='images/standards/stream.png') }}" alt="Live Stream" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                <svg class="w-8 h-8 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </span>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">3. โปรดักชัน Live Streaming Full HD</h3>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4 font-normal">
+                    ระบบกล้องสตูดิโอ 3–4 มุมกล้อง ครอบคลุมทั้งสนามและจังหวะ Dunk ถ่ายทอดสดตรงสู่ Facebook และ YouTube ด้วยภาพคมชัด 1080p 60fps พร้อมกราฟิกสกอร์บอร์ดสดแบบเรียลไทม์
+                </p>
+                <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-cheero-700">
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">กล้อง 3-4 มุม</span>
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">FULL HD 60FPS</span>
+                    <span class="bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">บันทึกเทปย้อนหลัง</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. พยาบาลและความปลอดภัย -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl border border-sky-100 shadow-xs flex flex-col sm:flex-row gap-5 items-start hover:shadow-md transition">
+            <span class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden p-2">
+                <img src="{{ url_for('static', filename='images/standards/medical.png') }}" alt="Medical Team" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                <svg class="w-8 h-8 text-rose-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </span>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">4. ทีมปฐมพยาบาล &amp; อุปกรณ์กู้ชีพ AED</h3>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4 font-normal">
+                    ความปลอดภัยของนักกีฬาคือสิ่งสำคัญอันดับแรก เรามีเต็นท์พยาบาลสแตนด์บายตลอดเวลา ชุดปฐมพยาบาลครบครัน อุปกรณ์กู้ชีพฉุกเฉิน AED และรถพยาบาลประสานงานเครือข่ายโรงพยาบาลใกล้เคียง
+                </p>
+                <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-rose-700">
+                    <span class="bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">เครื่องกู้ชีพ AED</span>
+                    <span class="bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">น้ำแข็งประคบ &amp; สเปรย์</span>
+                    <span class="bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">หน่วยพยาบาลฉุกเฉิน</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ส่วนสิ่งอำนวยความสะดวกในอาคาร (Amenities) -->
+    <div class="bg-white rounded-2xl border border-sky-100 p-6 sm:p-10 mb-14 shadow-xs">
+        <h3 class="text-xl font-bold text-slate-800 mb-6 text-center">สิ่งอำนวยความสะดวกครบครันภายในอารีน่า</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <div class="p-4 rounded-xl bg-cheero-softbg border border-sky-100 flex flex-col items-center">
+                <span class="w-10 h-10 rounded-xl bg-sky-100 text-cheero-600 flex items-center justify-center mb-2 overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/standards/locker.png') }}" alt="Locker" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                    <svg class="w-5 h-5 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </span>
+                <span class="font-bold text-slate-800 text-xs sm:text-sm block">ห้องล็อกเกอร์ &amp; อาบน้ำ</span>
+                <span class="text-[11px] text-slate-400 font-normal">แยกชาย-หญิงสะอาดปลอดภัย</span>
+            </div>
+            <div class="p-4 rounded-xl bg-cheero-softbg border border-sky-100 flex flex-col items-center">
+                <span class="w-10 h-10 rounded-xl bg-sky-100 text-cheero-600 flex items-center justify-center mb-2 overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/standards/grandstand.png') }}" alt="Grandstand" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                    <svg class="w-5 h-5 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </span>
+                <span class="font-bold text-slate-800 text-xs sm:text-sm block">อัฒจันทร์รองรับ 500+</span>
+                <span class="text-[11px] text-slate-400 font-normal">ที่นั่งชมวิวชัดเจนทุกมุม</span>
+            </div>
+            <div class="p-4 rounded-xl bg-cheero-softbg border border-sky-100 flex flex-col items-center">
+                <span class="w-10 h-10 rounded-xl bg-sky-100 text-cheero-600 flex items-center justify-center mb-2 overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/standards/parking.png') }}" alt="Parking" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                    <svg class="w-5 h-5 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                </span>
+                <span class="font-bold text-slate-800 text-xs sm:text-sm block">ลานจอดรถกว้างขวาง</span>
+                <span class="text-[11px] text-slate-400 font-normal">รองรับรถยนต์กว่า 120 คัน</span>
+            </div>
+            <div class="p-4 rounded-xl bg-cheero-softbg border border-sky-100 flex flex-col items-center">
+                <span class="w-10 h-10 rounded-xl bg-sky-100 text-cheero-600 flex items-center justify-center mb-2 overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/standards/cafe.png') }}" alt="Cafe" class="w-full h-full object-contain" onerror="if(!this.dataset.t1){this.dataset.t1='1';this.src=this.src.replace('.png','.jpg');}else{this.style.display='none'; this.nextElementSibling.style.display='block';}">
+                    <svg class="w-5 h-5 text-cheero-600" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V4a1 1 0 00-1-1H7a1 1 0 00-1 1v4m6 0h4a2 2 0 012 2v2a2 2 0 01-2 2h-4m0-6H6a2 2 0 00-2 2v2a2 2 0 002 2h6"></path></svg>
+                </span>
+                <span class="font-bold text-slate-800 text-xs sm:text-sm block">โซนอาหาร &amp; คาเฟ่</span>
+                <span class="text-[11px] text-slate-400 font-normal">เครื่องดื่มเกลือแร่และอาหาร</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ส่วนติดต่อและแผนที่ -->
+    <div id="contact" class="bg-gradient-to-r from-sky-500 via-cheero-500 to-indigo-600 text-white rounded-3xl p-6 sm:p-10 flex flex-col md:flex-row justify-between items-center gap-6 shadow-lg shadow-sky-500/20">
+        <div>
+            <span class="text-amber-200 font-mono text-xs font-bold uppercase tracking-widest block mb-1">CONTACT &amp; VENUE</span>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-white mb-1">สนใจจัดงานแข่งขันหรือสอบถามข้อมูลเพิ่มเติม?</h3>
+            <p class="text-xs sm:text-sm text-sky-100">ติดต่อทีมงานผู้ดูแลสนามและประสานงานได้ทุกวัน เวลา 08:00 - 21:00 น.</p>
+            <div class="mt-4 space-y-1.5 text-xs text-sky-100 font-normal">
+                <div><b>สถานที่:</b> อาคารกีฬาในร่ม BKB EVENT BOOKING Arena ขอนแก่น</div>
+                <div><b>โทรศัพท์:</b> ติดต่อประสานงาน: 098-927-6813</div>
+                <div class="font-mono"><b>อีเมล:</b> basketballeventbooking@gmail.com</div>
+            </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <a href="/packages" class="px-6 py-3.5 bg-white hover:bg-sky-50 text-cheero-600 font-bold rounded-xl text-xs sm:text-sm text-center shadow-xs transition">
+                ดูแพ็กเกจจัดงาน
+            </a>
+            <a href="/schedule" class="px-6 py-3.5 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl text-xs sm:text-sm text-center border border-white/40 transition backdrop-blur-xs">
+                เช็กวันว่าง
+            </a>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

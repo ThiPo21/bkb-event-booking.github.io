@@ -1,0 +1,192 @@
+<!-- ================= CREDITS MODAL (สไตล์หน้าปกรายงาน เรียบง่าย ชัดเจน) ================= -->
+<div id="gameIntroOverlay" 
+     class="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 select-none opacity-0 pointer-events-none transition-opacity duration-300 ease-out font-sans"
+     style="display: none;"
+     role="dialog"
+     aria-modal="true"
+     aria-label="ข้อมูลผู้จัดทำโครงงาน">
+
+    <!-- กรอบหน้าปกรายงาน (Academic Report Cover Card) -->
+    <div id="gameIntroCard" 
+         class="relative max-w-lg w-full bg-white text-slate-900 rounded-2xl p-6 sm:p-9 border border-slate-300 shadow-2xl text-center transition-transform duration-300 transform scale-95 max-h-[90vh] overflow-y-auto">
+        
+        <!-- ปุ่มกากบาทปิด (Close Button 'X') มุมขวาบน -->
+        <button type="button" id="closeIntroBtn" 
+                class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                aria-label="ปิดหน้าต่างเครดิต" title="ปิด">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <!-- โลโก้โครงการขนาดกะทัดรัด -->
+        <div class="w-14 h-14 mx-auto mb-3 flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo BKB Event" class="w-full h-full object-contain">
+        </div>
+
+        <!-- ชื่อระบบ -->
+        <div class="border-b border-slate-200 pb-4 mb-5">
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                ระบบจองจัดงานแข่งขันบาสเกตบอล
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 font-mono mt-0.5">
+                BKB EVENT BOOKING
+            </p>
+        </div>
+
+        <!-- ข้อมูลผู้พัฒนา (เรียบง่าย คลีน ฟีลหน้าปกรายงาน) -->
+        <div class="space-y-4 text-slate-700 text-xs sm:text-sm leading-relaxed mb-6">
+            
+            <!-- ผู้พัฒนา -->
+            <div>
+                <p class="text-xs text-slate-500 mb-1">ผู้พัฒนา</p>
+                <p class="text-base font-bold text-slate-900">
+                    นางสาวฐิติรัตน์ พงษ์ธนู
+                </p>
+                <p class="text-xs font-mono text-slate-600 mt-0.5">
+                    รหัสประจำตัว: 138-5
+                </p>
+                <p class="text-xs text-slate-700 mt-1">
+                    ชั้นปีที่ 2 สาขาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
+                </p>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    ปีการศึกษา 2569
+                </p>
+            </div>
+
+            <!-- รายวิชา -->
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <p class="text-xs text-slate-500 mb-0.5">วัตถุประสงค์การจัดทำ</p>
+                <p class="text-xs sm:text-sm font-semibold text-slate-800">
+                    จัดทำขึ้นเพื่อเป็นส่วนหนึ่งของรายวิชา<br>
+                    <span class="font-mono text-slate-900 font-bold">COMPUTER PROGRAMMING FOR TEACHERS</span>
+                </p>
+            </div>
+
+            <!-- ข้อความชี้แจงลิขสิทธิ์ -->
+            <div class="text-[11px] sm:text-xs text-slate-500 bg-slate-50/70 p-3 rounded-lg border border-slate-200 leading-normal text-left">
+                <span class="font-bold text-slate-600 block mb-0.5">หมายเหตุการใช้งาน:</span>
+                ซึ่งไม่ได้มีเจตนาพาดพิง หรือละเมิดลิขสิทธิ์ใด ๆ เนื่องจากจัดทำเพื่อการศึกษา ไม่ได้นำภาพ ดีไซน์ ไปใช้ในเชิงพาณิชย์ จึงเรียนมาเพื่อทราบ
+            </div>
+        </div>
+
+        <!-- ตัวเลือกไม่ต้องแสดงอีก และ ปุ่มเข้าสู่เว็บไซต์ -->
+        <div class="pt-2 border-t border-slate-200 space-y-3">
+            <div class="flex items-center justify-center">
+                <label class="flex items-center space-x-2 text-xs text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                    <input type="checkbox" id="dontShowIntroAgainCheck" class="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 cursor-pointer">
+                    <span>ไม่ต้องแสดงหน้านี้อีก</span>
+                </label>
+            </div>
+
+            <button type="button" id="confirmEnterSiteBtn" 
+                    class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-98 text-white rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer shadow-xs">
+                เข้าสู่เว็บไซต์
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+    const STORAGE_KEY_SESSION = 'bkb_event_intro_session_seen';
+    const STORAGE_KEY_NEVER = 'bkb_event_intro_never_show';
+
+    function isIntroSuppressed() {
+        try {
+            if (localStorage.getItem(STORAGE_KEY_NEVER) === 'true') {
+                return true;
+            }
+            if (sessionStorage.getItem(STORAGE_KEY_SESSION) === 'true') {
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+
+    function showCreditsModal(force) {
+        const overlay = document.getElementById('gameIntroOverlay');
+        const card = document.getElementById('gameIntroCard');
+        const checkbox = document.getElementById('dontShowIntroAgainCheck');
+        if (!overlay || !card) return;
+
+        if (!force && isIntroSuppressed()) {
+            return;
+        }
+
+        if (checkbox) {
+            checkbox.checked = (localStorage.getItem(STORAGE_KEY_NEVER) === 'true');
+        }
+
+        overlay.style.display = 'flex';
+        overlay.classList.remove('pointer-events-none', 'opacity-0');
+        overlay.classList.add('opacity-100');
+
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }
+
+    function closeCreditsModal() {
+        const overlay = document.getElementById('gameIntroOverlay');
+        const card = document.getElementById('gameIntroCard');
+        const checkbox = document.getElementById('dontShowIntroAgainCheck');
+        if (!overlay) return;
+
+        // บันทึกสถานะว่าดูแล้วในเซสชันนี้
+        try {
+            sessionStorage.setItem(STORAGE_KEY_SESSION, 'true');
+            if (checkbox && checkbox.checked) {
+                localStorage.setItem(STORAGE_KEY_NEVER, 'true');
+            } else {
+                localStorage.removeItem(STORAGE_KEY_NEVER);
+            }
+        } catch(e) {}
+
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+        if (card) {
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+
+        setTimeout(function() {
+            overlay.style.display = 'none';
+        }, 300);
+    }
+
+    // ฟังก์ชันสำหรับเปิดดูซ้ำเมื่อคลิกปุ่มเครดิตในหน้าเว็บ
+    window.replayGameIntro = function() {
+        showCreditsModal(true);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const closeBtn = document.getElementById('closeIntroBtn');
+        const confirmBtn = document.getElementById('confirmEnterSiteBtn');
+        const overlay = document.getElementById('gameIntroOverlay');
+
+        if (closeBtn) closeBtn.addEventListener('click', closeCreditsModal);
+        if (confirmBtn) confirmBtn.addEventListener('click', closeCreditsModal);
+
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    closeCreditsModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            const overlay = document.getElementById('gameIntroOverlay');
+            if (overlay && overlay.style.display !== 'none' && !overlay.classList.contains('pointer-events-none')) {
+                if (e.key === 'Escape') {
+                    closeCreditsModal();
+                }
+            }
+        });
+
+        // แสดงผลครั้งแรก
+        showCreditsModal(false);
+    });
+})();
+</script>

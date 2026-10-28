@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}ประวัติการจองของฉัน | BKB EVENT BOOKING{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
+    <!-- ส่วนหัวหน้า สไตล์เหลี่ยม เรียบ คมชัด (Sharp Minimalist) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 border-b border-slate-300 pb-5">
+        <div>
+            <div class="flex items-center space-x-2 mb-1.5">
+                <span class="bg-slate-100 text-slate-800 text-xs font-semibold uppercase px-2.5 py-0.5 border border-slate-300 font-mono">
+                    MY BOOKINGS
+                </span>
+                <span class="w-1.5 h-1.5 bg-cheero-600"></span>
+                <span class="text-xs text-slate-500 font-medium">รายการจองของฉัน</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900">
+                ประวัติการจองอีเว้นท์ของฉัน
+            </h1>
+            <p class="text-slate-600 text-xs sm:text-sm mt-0.5 font-normal">ติดตามสถานะการจอง วันที่จัดงาน และการคอนเฟิร์มคิวงานจากผู้จัด</p>
+        </div>
+        <a href="/packages" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 border border-sky-600 transition text-center uppercase tracking-wider font-mono shadow-2xs">
+            + จองโปรแกรมใหม่
+        </a>
+    </div>
+
+    {% if bookings %}
+        <!-- แถบควบคุมการย่อ/ขยายทั้งหมด -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-1 text-xs">
+            <span class="text-slate-500 font-mono">
+                พบประวัติการจองทั้งหมด {{ bookings|length }} รายการ (คลิกที่แถบหรือลูกศรเพื่อเปิด-ปิดดูรายละเอียด)
+            </span>
+            <div class="flex items-center space-x-2 self-start sm:self-auto font-mono">
+                <button type="button" onclick="collapseAllBookings()" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 transition cursor-pointer">
+                    ย่อทั้งหมด
+                </button>
+                <button type="button" onclick="expandAllBookings()" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white font-bold border border-sky-600 transition cursor-pointer shadow-2xs">
+                    ขยายทั้งหมด
+                </button>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            {% for b in bookings %}
+            <div class="bg-white border border-slate-300 shadow-2xs transition overflow-hidden" id="booking-card-{{ b.id }}">
+                <!-- แถบหัวข้อแบบย่อ (คลิกเปิด-ปิดได้ พร้อมลูกศร) -->
+                <button type="button" 
+                        onclick="toggleBooking('{{ b.id }}')"
+                        class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 bg-white hover:bg-slate-50 transition cursor-pointer select-none">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+                        <span class="text-[10px] sm:text-[11px] font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 border border-slate-300 uppercase flex-shrink-0">
+                            #BOOKING-{{ b.id }}
+                        </span>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate">
+                            {{ b.package_name }}
+                        </h3>
+                        <span class="text-xs text-slate-500 font-mono hidden md:inline flex-shrink-0">
+                            | วันจัดงาน: {{ b.event_date }}
+                        </span>
+                        <span class="text-xs font-bold text-emerald-700 font-mono hidden sm:inline flex-shrink-0">
+                            (มัดจำ ฿{{ "{:,.2f}".format(b.deposit_amount or 0) }})
+                        </span>
+                    </div>
+
+                    <div class="flex items-center space-x-2.5 flex-shrink-0">
+                        <!-- ป้ายสถานะการจอง -->
+                        {% if b.status == 'confirmed' %}
+                            <span class="inline-flex items-center text-[10px] sm:text-xs font-bold text-emerald-900 bg-emerald-50 px-2.5 py-1 border border-emerald-300 font-mono uppercase tracking-wider">
+                                <span class="w-1.5 h-1.5 bg-emerald-600 mr-1.5"></span>
+                                ได้รับการอนุมัติแล้ว
+                            </span>
+                        {% elif b.status == 'rejected' %}
+                            <span class="inline-flex items-center text-[10px] sm:text-xs font-bold text-rose-900 bg-rose-50 px-2.5 py-1 border border-rose-300 font-mono uppercase tracking-wider">
+                                <span class="w-1.5 h-1.5 bg-rose-600 mr-1.5"></span>
+                                ปฏิเสธคำขอ
+                            </span>
+                        {% elif b.status == 'cancelled' %}
+                            <span class="inline-flex items-center text-[10px] sm:text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-1 border border-slate-300 font-mono uppercase tracking-wider">
+                                <span class="w-1.5 h-1.5 bg-slate-500 mr-1.5"></span>
+                                ยกเลิกแล้ว
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center text-[10px] sm:text-xs font-bold text-amber-900 bg-amber-50 px-2.5 py-1 border border-amber-300 font-mono uppercase tracking-wider">
+                                <span class="w-1.5 h-1.5 bg-amber-500 mr-1.5"></span>
+                                รอการตรวจสอบ / รออนุมัติ
+                            </span>
+                        {% endif %}
+
+                        <!-- ไอคอนลูกศรเปิด/ปิด (Chevron Arrow) -->
+                        <div class="p-1.5 border border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                            <svg id="chevron-{{ b.id }}" class="w-4 h-4 transform transition-transform duration-200 {% if loop.first %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- ส่วนเนื้อหารายละเอียด (เปิดรายการแรกเป็นค่าเริ่มต้น รายการอื่นย่อไว้) -->
+                <div id="booking-details-{{ b.id }}" class="border-t border-slate-200 p-5 sm:p-6 bg-slate-50/20 {% if not loop.first %}hidden{% endif %}">
+                    <!-- ข้อมูลสรุปสไตล์เหลี่ยม -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs mb-3 font-mono">
+                        <div class="bg-white p-3 border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block mb-0.5 uppercase">วันที่จัดงานแข่งขัน:</span>
+                            <span class="font-bold text-slate-900 text-sm">{{ b.event_date }}</span>
+                            <span class="text-[11px] text-cheero-600 block mt-0.5 font-bold">{{ b.event_time or '08:00 - 17:00 น.' }}</span>
+                        </div>
+                        <div class="bg-white p-3 border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block mb-0.5 uppercase">ยอดรวมทั้งหมด:</span>
+                            <span class="font-bold text-slate-900 text-sm">฿{{ "{:,}".format(b.total_price) }}</span>
+                        </div>
+                        <div class="bg-emerald-50 p-3 border border-emerald-300">
+                            <span class="text-[10px] text-emerald-800 font-bold block mb-0.5 uppercase">มัดจำชำระแล้ว (5%):</span>
+                            <span class="font-bold text-emerald-700 text-sm">฿{{ "{:,.2f}".format(b.deposit_amount or 0) }}</span>
+                            <span class="text-[10px] text-emerald-600 block mt-0.5 font-bold">พร้อมเพย์ 091-830-3564</span>
+                        </div>
+                        <div class="bg-white p-3 border border-slate-200">
+                            <span class="text-[10px] text-slate-400 font-bold block mb-0.5 uppercase">วันที่ทำรายการ:</span>
+                            <span class="font-medium text-slate-700 text-xs">{{ b.created_at[:16] }}</span>
+                            {% if b.invoice_no %}
+                            <span class="text-[10px] text-slate-500 block mt-0.5">{{ b.invoice_no }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- สนามแข่งขันที่เลือก -->
+                    <div class="p-3 bg-white border border-slate-200 mb-3 text-xs">
+                        <span class="font-bold text-slate-800 uppercase font-mono text-[10px] block mb-0.5">สนามแข่งขัน (VENUE):</span>
+                        <span class="font-bold text-slate-900">{{ b.venue or 'ศูนย์กีฬาและสุขภาพ มหาวิทยาลัยขอนแก่น' }}</span>
+                    </div>
+
+                    <!-- รายละเอียดออพชั่น -->
+                    <div class="text-xs text-slate-700 mb-3 font-normal">
+                        <span class="font-bold text-slate-900 font-mono">ออพชั่นเสริมที่เลือก:</span>
+                        {% if b.options_list %}
+                            <div class="mt-1.5 flex flex-wrap gap-1 font-mono">
+                                {% for opt in b.options_list %}
+                                    <span class="bg-white text-slate-800 px-2 py-0.5 border border-slate-300 text-[10px]">
+                                        + {{ opt }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="text-slate-400 ml-1 font-mono">- ไม่มีออพชั่นเสริม -</span>
+                        {% endif %}
+                    </div>
+
+                    {% if b.note %}
+                    <div class="text-xs text-slate-700 bg-white p-3 border border-slate-200 mb-3">
+                        <b>หมายเหตุของคุณ:</b> {{ b.note }}
+                    </div>
+                    {% endif %}
+
+                    <!-- ข้อความตอบกลับจากแอดมิน (ถ้ามี) -->
+                    {% if b.admin_note %}
+                    <div class="text-xs p-3 border font-mono mb-3 {% if b.status == 'confirmed' %}bg-emerald-50 text-emerald-900 border-emerald-300{% elif b.status == 'rejected' %}bg-rose-50 text-rose-900 border-rose-300{% else %}bg-amber-50 text-amber-900 border-amber-300{% endif %}">
+                        <b>ข้อความจากผู้จัดงาน:</b> {{ b.admin_note }}
+                    </div>
+                    {% endif %}
+
+                    {% if b.status == 'rejected' %}
+                    <div class="text-xs p-3 border font-sans mb-3 bg-rose-50 text-rose-900 border-rose-300 leading-relaxed">
+                        <b>นโยบายการคืนเงินมัดจำ:</b> กรณีการจองถูกปฏิเสธเนื่องจากบุคลากรหรือกรรมการตัดสินไม่เพียงพอ ทางผู้จัดจะทำการคืนเงินมัดจำเต็มจำนวนทุกกรณี ภายในเวลาทำการ 3 - 5 วัน
+                    </div>
+                    {% endif %}
+
+                    <!-- แถบปุ่มจัดการรายการ (ดูใบเสร็จ / แนบสลิป / ยกเลิกการจอง / ลบประวัติ) -->
+                    <div class="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center space-x-2">
+                            <a href="/invoice/{{ b.id }}" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold font-mono border border-sky-600 transition flex items-center space-x-1 shadow-2xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>ดูและดาวน์โหลดใบเสร็จ (PDF)</span>
+                            </a>
+
+                            {% if b.slip_image %}
+                            <div class="inline-flex items-center space-x-1">
+                                <a href="{{ b.slip_image }}" target="_blank" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold font-mono border border-emerald-300 transition flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    <span>ดูสลิปที่แนบ</span>
+                                </a>
+                                <button type="button" onclick="openSlipModal('{{ b.id }}', '{{ b.package_name }}', '{{ '{:,.2f}'.format(b.deposit_amount or 0) }}', {{ b.deposit_amount or 1.0 }})" class="px-2 py-1.5 bg-white hover:bg-slate-100 text-slate-600 text-xs font-mono border border-slate-300 transition cursor-pointer" title="เปลี่ยนสลิปใหม่">
+                                    [เปลี่ยนสลิป]
+                                </button>
+                            </div>
+                            {% else %}
+                            <button type="button" onclick="openSlipModal('{{ b.id }}', '{{ b.package_name }}', '{{ '{:,.2f}'.format(b.deposit_amount or 0) }}', {{ b.deposit_amount or 1.0 }})" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold font-mono border border-amber-600 transition flex items-center space-x-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>แนบสลิปโอนเงิน</span>
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            {% if b.status == 'pending' or b.status == 'confirmed' %}
+                            <form method="POST" action="/my-bookings" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำขอจอง #{{ b.id }} นี้? เมื่อยกเลิกแล้ววันดังกล่าวจะถูกปล่อยว่างให้ผู้อื่นจองได้');">
+                                <input type="hidden" name="action" value="cancel_booking">
+                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                <button type="submit" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-300 transition cursor-pointer font-mono">
+                                    ยกเลิกคำขอจองนี้
+                                </button>
+                            </form>
+                            {% elif b.status == 'cancelled' or b.status == 'rejected' %}
+                            <form method="POST" action="/my-bookings" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบประวัติรายการจอง #{{ b.id }} นี้ออกจากระบบ?');">
+                                <input type="hidden" name="action" value="delete_booking">
+                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                <button type="submit" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 transition cursor-pointer font-mono">
+                                    ลบประวัติรายการนี้
+                                </button>
+                            </form>
+                            {% endif %}
+                            <span class="text-[10px] text-slate-400 font-mono ml-2">REF #{{ b.id }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white border border-slate-300 p-8 sm:p-12 text-center shadow-2xs">
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 font-mono">คุณยังไม่มีรายการจองในขณะนี้</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-normal">
+                เริ่มต้นสร้างทัวร์นาเมนต์บาสเกตบอลของคุณได้ง่ายๆ เลือกโปรแกรมการแข่งขันแล้วส่งคำขอจองวันได้เลย
+            </p>
+            <div class="mt-5">
+                <a href="/packages" class="inline-block bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm px-5 py-2.5 border border-sky-600 transition font-mono uppercase tracking-wider shadow-2xs">
+                    ดูโปรแกรมการแข่งขันทั้งหมด
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal แนบสลิปโอนเงิน (Interactive Slip Upload Dialog สไตล์เหลี่ยม คมชัด พร้อม QR Code) -->
+<div id="slipModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border-2 border-sky-600 w-full max-w-md p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <div>
+                <span class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">ATTACH TRANSFER SLIP</span>
+                <h3 class="text-base font-bold text-slate-900" id="modalBookingTitle">แนบสลิปการโอนเงิน</h3>
+            </div>
+            <button type="button" onclick="closeSlipModal()" class="text-slate-400 hover:text-slate-800 text-xs font-bold font-mono px-2 py-1 cursor-pointer border border-slate-200 hover:border-slate-400">
+                [X]
+            </button>
+        </div>
+
+        <!-- กล่องแสดง QR Code พร้อมเพย์ตามยอดราคาจองจริง -->
+        <div class="border border-slate-300 bg-slate-50 p-3 flex flex-col sm:flex-row items-center gap-3">
+            <div class="w-32 h-32 bg-white border border-slate-300 p-1 flex-shrink-0 flex items-center justify-center relative">
+                <img id="modalQrImg" src="" alt="PromptPay QR Code" class="w-full h-full object-contain">
+                <div id="modalQrLoader" class="absolute inset-0 bg-white/90 flex items-center justify-center text-[10px] font-mono text-slate-500">
+                    โหลด QR...
+                </div>
+            </div>
+            <div class="text-xs space-y-1 font-mono text-left w-full">
+                <div class="text-[10px] text-slate-500 uppercase font-bold">พร้อมเพย์รับเงิน:</div>
+                <div class="text-slate-900 font-bold">091-830-3564</div>
+                <div class="text-slate-500 text-[10px]">ฝ่ายการเงิน BKB EVENT BOOKING</div>
+                <div class="pt-1 border-t border-slate-200">
+                    <span class="text-[10px] text-slate-500 uppercase block font-bold">ราคาใน QR Code นี้:</span>
+                    <span class="text-lg font-bold text-emerald-600 block" id="modalDepositAmount">฿0.00</span>
+                    <span class="text-[9px] text-slate-500 font-sans block">* สแกนแล้วยอดเงินจะระบุอัตโนมัติ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 border border-slate-200 text-xs space-y-1 font-mono">
+            <div class="flex justify-between">
+                <span class="text-slate-500">รหัสการจอง:</span>
+                <span class="font-bold text-slate-900" id="modalBookingRef">#BOOKING-</span>
+            </div>
+        </div>
+
+        <form id="modalSlipForm" method="POST" action="" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 font-mono">
+                    เลือกภาพสลิปหลักฐาน (.JPG, .PNG, .WEBP): <span class="text-rose-600">*</span>
+                </label>
+                <input type="file" name="slip" id="modalSlipInput" accept="image/jpeg,image/png,image/webp" required
+                       class="w-full text-xs font-mono file:mr-3 file:py-2 file:px-3 file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white file:cursor-pointer hover:file:bg-slate-800 border border-slate-300 p-1.5">
+            </div>
+
+            <div id="modalSlipPreviewWrapper" class="hidden text-center">
+                <img id="modalSlipPreviewImg" src="" alt="พรีวิวสลิป" class="max-h-44 mx-auto border border-slate-300 p-1 bg-slate-50">
+            </div>
+
+            <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200 font-mono">
+                <button type="button" onclick="closeSlipModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 transition">
+                    ยกเลิก
+                </button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold border border-slate-900 transition">
+                    อัปโหลดสลิป
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ฟังก์ชันเปิด/ปิด ย่อ/ขยาย แต่ละรายการจอง
+    function toggleBooking(id) {
+        const details = document.getElementById('booking-details-' + id);
+        const chevron = document.getElementById('chevron-' + id);
+        if (!details) return;
+
+        if (details.classList.contains('hidden')) {
+            details.classList.remove('hidden');
+            if (chevron) chevron.classList.add('rotate-180');
+        } else {
+            details.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+    }
+
+    // ฟังก์ชันขยายทุกรายการจอง
+    function expandAllBookings() {
+        document.querySelectorAll('[id^="booking-details-"]').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('[id^="chevron-"]').forEach(el => el.classList.add('rotate-180'));
+    }
+
+    // ฟังก์ชันย่อทุกรายการจอง
+    function collapseAllBookings() {
+        document.querySelectorAll('[id^="booking-details-"]').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('[id^="chevron-"]').forEach(el => el.classList.remove('rotate-180'));
+    }
+
+    // ฟังก์ชันจัดการ Modal แนบสลิป
+    function openSlipModal(bookingId, pkgName, depositText, depositVal) {
+        const overlay = document.getElementById('slipModalOverlay');
+        const form = document.getElementById('modalSlipForm');
+        const title = document.getElementById('modalBookingTitle');
+        const ref = document.getElementById('modalBookingRef');
+        const deposit = document.getElementById('modalDepositAmount');
+        const previewWrap = document.getElementById('modalSlipPreviewWrapper');
+        const input = document.getElementById('modalSlipInput');
+        const qrImg = document.getElementById('modalQrImg');
+        const qrLoader = document.getElementById('modalQrLoader');
+
+        if (form) form.action = '/upload-slip/' + bookingId;
+        if (title) title.textContent = 'แนบสลิป: ' + (pkgName || 'รายการจอง');
+        if (ref) ref.textContent = '#BOOKING-' + bookingId;
+        if (deposit) deposit.textContent = '฿' + (depositText || '0.00');
+        if (previewWrap) previewWrap.classList.add('hidden');
+        if (input) input.value = '';
+
+        // ดึง QR Code ฝังราคาจองจริงสำหรับคิวนี้
+        if (qrLoader) qrLoader.classList.remove('hidden');
+        const amountNum = depositVal || 1.0;
+        fetch('/api/promptpay-qr?amount=' + amountNum)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.qr_image && qrImg) {
+                    qrImg.src = data.qr_image;
+                }
+            })
+            .catch(err => console.error('Error fetching modal promptpay QR:', err))
+            .finally(() => {
+                if (qrLoader) qrLoader.classList.add('hidden');
+            });
+
+        if (overlay) overlay.classList.remove('hidden');
+    }
+
+    function closeSlipModal() {
+        const overlay = document.getElementById('slipModalOverlay');
+        if (overlay) overlay.classList.add('hidden');
+    }
+
+    const modalSlipInput = document.getElementById('modalSlipInput');
+    const modalSlipPreviewImg = document.getElementById('modalSlipPreviewImg');
+    const modalSlipPreviewWrapper = document.getElementById('modalSlipPreviewWrapper');
+
+    if (modalSlipInput) {
+        modalSlipInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (modalSlipPreviewImg) modalSlipPreviewImg.src = e.target.result;
+                    if (modalSlipPreviewWrapper) modalSlipPreviewWrapper.classList.remove('hidden');
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                if (modalSlipPreviewWrapper) modalSlipPreviewWrapper.classList.add('hidden');
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}โปรแกรมและแพ็กเกจจัดงานแข่งขันบาสเกตบอล | BKB EVENT BOOKING{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
+
+    <!-- ส่วนหัวหน้า แพ็กเกจการจัดงาน (สไตล์เหลี่ยม เรียบ คมชัด สบายตา) -->
+    <div class="border-b border-slate-300 pb-5 mb-6 sm:mb-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="bg-slate-100 text-slate-800 text-xs font-semibold uppercase px-2.5 py-1 border border-slate-300 font-mono">
+                        PACKAGES &amp; PRICING CATALOG
+                    </span>
+                    <span class="w-1.5 h-1.5 bg-cheero-600"></span>
+                    <span class="text-xs text-slate-500 font-medium">{{ packages|length }} รูปแบบโปรแกรมการแข่งขัน (รวมแพ็กเกจทดสอบ)</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug">
+                    โปรแกรมและแพ็กเกจจัดงานแข่งขันบาสเกตบอล
+                </h1>
+                <p class="text-slate-600 text-xs sm:text-sm mt-1 max-w-2xl font-normal leading-relaxed">
+                    เปรียบเทียบสเกลงาน ดูรายการบริการที่จะได้รับ ราคาเต็ม ยอดมัดจำ 5% และกดเลือกเพื่อระบุวัน เวลา และสนามในขอนแก่น
+                </p>
+            </div>
+
+            <!-- กล่องค้นหาแพ็กเกจแบบเหลี่ยม คมชัด -->
+            <div class="w-full md:w-72 flex-shrink-0">
+                <div class="relative">
+                    <input type="text" id="catalogSearch" placeholder="ค้นหาตามชื่อ หรือประเภท..." 
+                           class="w-full pl-9 pr-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-300 focus:outline-none focus:border-cheero-600 placeholder-slate-400 text-slate-800 transition font-mono">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- แถบเลือกหมวดหมู่ แบบเหลี่ยม คมชัด สไตล์ Minimalist -->
+        <div class="flex items-center space-x-2 overflow-x-auto pt-5 pb-1 no-scrollbar">
+            <button type="button" data-filter="all" class="catalog-filter-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-sky-600 text-white border border-sky-600 transition cursor-pointer font-mono shadow-2xs">
+                ทั้งหมด
+            </button>
+            <button type="button" data-filter="test" class="catalog-filter-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition cursor-pointer font-mono">
+                ทดสอบระบบ (มัดจำ 1 บ.)
+            </button>
+            <button type="button" data-filter="5v5" class="catalog-filter-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition cursor-pointer font-mono">
+                ทัวร์นาเมนต์ 5x5
+            </button>
+            <button type="button" data-filter="3v3" class="catalog-filter-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition cursor-pointer font-mono">
+                บาสเกตบอล 3x3
+            </button>
+            <button type="button" data-filter="corp" class="catalog-filter-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition cursor-pointer font-mono">
+                องค์กร &amp; บริษัท
+            </button>
+            <button type="button" data-filter="youth" class="catalog-filter-btn px-3.5 py-1.5 text-xs sm:text-sm font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition cursor-pointer font-mono">
+                ลีกเยาวชน
+            </button>
+        </div>
+    </div>
+
+    <!-- กล่องแจ้งเตือนแพ็กเกจทดสอบระบบ โอนมัดจำเพียง 1 บาท -->
+    <div class="mb-6 p-4 bg-slate-50 border border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+        <div class="text-slate-800 font-sans leading-relaxed">
+            <b>โหมดทดสอบระบบ (TEST &amp; DEMO):</b> เปิดให้ทดสอบการจอง ชำระมัดจำจริง <b>1.00 บาท</b> ผ่านพร้อมเพย์ <b>091-830-3564</b> และดาวน์โหลดใบเสร็จ/ใบกำกับภาษี (PDF) ได้ทันที
+        </div>
+        <a href="/book/test" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold whitespace-nowrap border border-sky-600 transition text-center uppercase tracking-wider shadow-2xs">
+            ทดสอบจอง (โอน 1 บ.) →
+        </a>
+    </div>
+
+    <!-- Grid โปรแกรม สไตล์เหลี่ยม คมชัด เรียบ สะอาดตา -->
+    <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        {% for key, pkg in packages.items() %}
+        {% set deposit_val = 1.0 if key == 'test' else (pkg.price * 0.05)|int %}
+        <a href="/book/{{ key }}" 
+           class="catalog-card group bg-white border border-slate-300 hover:border-sky-600 hover:shadow-lg transition-all duration-200 flex flex-col justify-between cursor-pointer no-underline text-slate-900 overflow-hidden" 
+           data-category="{{ pkg.category or '5v5' }}" 
+           data-title="{{ pkg.name }}">
+            
+            <div>
+                <!-- กรอบรูปภาพด้านบนของการ์ด -->
+                <div class="h-44 sm:h-48 overflow-hidden bg-slate-100 relative border-b border-slate-200">
+                    <img src="{{ pkg.image or ('/static/images/catalogs/' + key + '.jpg') }}" 
+                         alt="{{ pkg.name }}" 
+                         class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                         onerror="this.src='/static/images/catalogs/catalog1.jpg';">
+                    
+                    <div class="absolute top-3 left-3 flex items-center space-x-1.5 z-10">
+                        <span class="bg-sky-700 text-white text-[10px] font-mono font-bold px-2 py-0.5 border border-sky-800 uppercase">
+                            {{ pkg.scale_badge }}
+                        </span>
+                        <span class="bg-white text-slate-800 text-[10px] font-mono font-bold px-2 py-0.5 border border-slate-300">
+                            {{ pkg.duration }}
+                        </span>
+                    </div>
+
+                    <!-- Overlay แสดงเมื่อโฮเวอร์เม้าส์ -->
+                    <div class="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                        <span class="px-3.5 py-1.5 bg-slate-900/90 text-white text-xs font-bold font-mono tracking-wider border border-white/20 shadow-md">
+                            คลิกเพื่อเข้าสู่หน้าจอง →
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-5 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-1.5 leading-snug group-hover:text-sky-600 transition">
+                        {{ pkg.name }}
+                    </h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mb-4 leading-relaxed font-normal">{{ pkg.description }}</p>
+
+                    <!-- กล่องแสดงราคาเต็ม & ยอดมัดจำ 5% ชัดเจน -->
+                    <div class="grid grid-cols-2 gap-2 text-xs py-2.5 border-y border-slate-200 mb-4 bg-slate-50 p-2.5 font-mono">
+                        <div>
+                            <span class="text-slate-500 block text-[10px] uppercase font-bold">ราคาเริ่มต้น</span>
+                            <span class="font-bold text-slate-900 text-sm sm:text-base">
+                                {% if key == 'test' %}
+                                    ฿20.00 <span class="text-[10px] text-slate-400 font-normal">(ทดสอบ)</span>
+                                {% else %}
+                                    ฿{{ "{:,}".format(pkg.price) }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-emerald-700 block text-[10px] uppercase font-bold">ยอดมัดจำ 5%</span>
+                            <span class="font-bold text-emerald-600 text-sm sm:text-base">
+                                {% if key == 'test' %}
+                                    ฿1.00 <span class="text-[10px] text-emerald-700 font-normal">(โอน 1 บ.)</span>
+                                {% else %}
+                                    ฿{{ "{:,}".format(deposit_val) }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- รายการบริการที่ได้รับ -->
+                    <div class="mb-2">
+                        <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-2 font-mono">
+                            บริการและอุปกรณ์ในแพ็กเกจ:
+                        </span>
+                        <ul class="space-y-1.5 text-xs text-slate-600 font-normal">
+                            {% for feature in pkg.features %}
+                            <li class="flex items-start space-x-2">
+                                <span class="w-1.5 h-1.5 bg-cheero-600 flex-shrink-0 mt-1.5"></span>
+                                <span>{{ feature }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- แถบด้านล่าง: ชัดเจนและเรียบง่าย แทนที่ปุ่มเดิมที่เกะกะ -->
+            <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs font-mono text-slate-600 group-hover:bg-sky-50 group-hover:text-sky-700 transition">
+                <span class="font-bold uppercase tracking-wider text-[11px]">คลิกเพื่อจองแพ็กเกจ</span>
+                <span class="text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- ข้อเสนอแนะและออพชั่นเสริม สไตล์เหลี่ยม คมชัด -->
+    <div class="mt-12 bg-white border border-slate-300 p-5 sm:p-6 shadow-2xs">
+        <h3 class="text-sm sm:text-base font-bold text-slate-900 mb-4 flex items-center space-x-2 font-mono">
+            <span class="w-2 h-2 bg-cheero-600"></span>
+            <span>ออพชั่นเสริมที่สามารถเลือกเพิ่มเติมได้ในขั้นตอนจอง</span>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-mono">
+            <div class="p-3.5 bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slate-900 mb-1">เพิ่มกรรมการตัดสิน (+1,500 บ.)</div>
+                <p class="text-xs text-slate-600 font-sans">เพิ่มผู้ตัดสิน 1 ท่าน เพื่อการควบคุมเกมที่ละเอียดและเข้มงวด</p>
+            </div>
+            <div class="p-3.5 bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slate-900 mb-1">Live Streaming Full HD (+3,000 บ.)</div>
+                <p class="text-xs text-slate-600 font-sans">ถ่ายทอดสดหลายมุมกล้องพร้อมกราฟิกสกอร์บอร์ดสด</p>
+            </div>
+            <div class="p-3.5 bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slate-900 mb-1">ชุดน้ำดื่ม &amp; อาหารว่าง (+1,000 บ.)</div>
+                <p class="text-xs text-slate-600 font-sans">บริการน้ำดื่มลังและเกลือแร่เย็นสำหรับนักกีฬาทุกทีม</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JavaScript: ค้นหาและกรองหมวดหมู่แคตตาล็อกอย่างแม่นยำ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.catalog-filter-btn');
+    const cards = document.querySelectorAll('.catalog-card');
+    const searchInput = document.getElementById('catalogSearch');
+
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    function updateCatalogDisplay() {
+        cards.forEach(card => {
+            const cardCat = card.getAttribute('data-category');
+            const cardTitle = (card.getAttribute('data-title') || '').toLowerCase();
+            const textContent = card.innerText.toLowerCase();
+
+            const matchesCategory = (currentFilter === 'all') || (cardCat === currentFilter);
+            const matchesSearch = !searchQuery || cardTitle.includes(searchQuery) || textContent.includes(searchQuery);
+
+            if (matchesCategory && matchesSearch) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => {
+                b.classList.remove('bg-sky-600', 'text-white', 'border-sky-600', 'shadow-2xs');
+                b.classList.add('bg-white', 'text-slate-700', 'hover:bg-slate-100', 'border-slate-300');
+            });
+            this.classList.remove('bg-white', 'text-slate-700', 'hover:bg-slate-100', 'border-slate-300');
+            this.classList.add('bg-sky-600', 'text-white', 'border-sky-600', 'shadow-2xs');
+
+            currentFilter = this.getAttribute('data-filter');
+            updateCatalogDisplay();
+        });
+    });
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            searchQuery = this.value.trim().toLowerCase();
+            updateCatalogDisplay();
+        });
+    }
+});
+</script>
+{% endblock %}

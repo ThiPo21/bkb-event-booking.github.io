@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: bkb-event-booking
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        value: basketballeventbooking@gmail.com
+      - key: MAIL_PASSWORD
+        value: "lhko rxnl ubfz awvz"

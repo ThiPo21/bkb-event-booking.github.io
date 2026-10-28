@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>หน้าเริ่มต้น - BKB EVENT BOOKING | ระบบจองจัดงานแข่งขันบาสเกตบอล</title>
+    <!-- Favicon โลโก้แบรนด์ -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <!-- Google Fonts: Prompt & Sarabun (ฟอนต์มาตรฐาน อ่านง่าย ตัวเลขอ่านสบายตา) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'Sarabun', 'sans-serif'],
+                        mono: ['Prompt', 'Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        cheero: {
+                            50: '#F0F9FF',
+                            100: '#E0F2FE',
+                            200: '#BAE6FD',
+                            300: '#7DD3FC',
+                            400: '#38BDF8',
+                            500: '#1D8AF2',
+                            600: '#0284C7',
+                            700: '#0369A1',
+                            coral: '#FB7185',
+                            softbg: '#F6FAFD',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Prompt', 'Sarabun', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: floatBubble 3.5s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(56, 189, 248, 0.45), 0 0 30px rgba(29, 138, 242, 0.3); 
+            }
+            50% { 
+                box-shadow: 0 0 25px rgba(29, 138, 242, 0.8), 0 0 45px rgba(56, 189, 248, 0.5); 
+            }
+        }
+        @keyframes gentleWiggle {
+            0% {
+                transform: scale(1.03) translate(0px, 0px) rotate(0deg);
+            }
+            20% {
+                transform: scale(1.045) translate(-4px, 3px) rotate(0.25deg);
+            }
+            40% {
+                transform: scale(1.035) translate(3px, -3px) rotate(-0.2deg);
+            }
+            60% {
+                transform: scale(1.05) translate(-3px, -4px) rotate(0.2deg);
+            }
+            80% {
+                transform: scale(1.04) translate(4px, 2px) rotate(-0.15deg);
+            }
+            100% {
+                transform: scale(1.03) translate(0px, 0px) rotate(0deg);
+            }
+        }
+        .banner-wiggle-effect {
+            animation: gentleWiggle 12s ease-in-out infinite;
+            transform-origin: center center;
+            will-change: transform;
+        }
+        .animate-glow {
+            animation: pulseGlow 2.8s infinite;
+        }
+        @keyframes modalScale {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-modal {
+            animation: modalScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-800 h-full w-full overflow-hidden select-none relative flex flex-col justify-between">
+
+    <!-- ================= 1. รางภาพสไลด์พื้นหลัง (เน้นภาพสไลด์โปรโมทเต็มจอ ไม่โดนบัง) ================= -->
+    <div id="portalBgTrack" class="absolute inset-0 w-full h-full flex transition-transform duration-700 ease-out z-0">
+        {% if banners %}
+            {% for banner in banners %}
+            <div class="portal-slide min-w-full w-full h-full relative flex-shrink-0 bg-slate-950 overflow-hidden" data-index="{{ loop.index0 }}">
+                <img src="{{ url_for('static', filename=banner.path if banner.path is defined else ('banners/' + banner)) }}" 
+                     alt="ภาพโปรโมท {{ loop.index }}: {{ banner.name if banner.name is defined else banner }}" 
+                     class="w-full h-full object-cover object-center pointer-events-none select-none banner-wiggle-effect"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                
+                <!-- Fallback ถ้ายังไม่ได้ใส่ไฟล์ภาพ -->
+                <div class="w-full h-full p-8 text-center bg-slate-900 text-white flex-col items-center justify-center" style="display: none;">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" class="w-20 h-20 object-contain mb-3 mx-auto" alt="Logo">
+                    <h3 class="font-bold text-2xl text-white font-mono uppercase tracking-wider">BKB EVENT BOOKING ARENA</h3>
+                    <p class="text-xs text-sky-300 mt-2 font-mono">FILE: static/{{ banner.path if banner.path is defined else ('banners/' + banner) }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="portal-slide min-w-full w-full h-full relative flex-shrink-0 bg-gradient-to-br from-sky-950 via-slate-900 to-indigo-950 flex items-center justify-center p-8 text-center text-white">
+                <div>
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" class="w-20 h-20 object-contain mb-3 mx-auto" alt="Logo">
+                    <h3 class="font-black text-2xl sm:text-3xl uppercase tracking-wider">BKB EVENT BOOKING</h3>
+                    <p class="text-xs text-sky-200 mt-1">วางรูปภาพพื้นหลังโปรโมทในโฟลเดอร์ static/banners/ ได้ตลอดเวลา</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- OVERLAY ฟิล์มแสงสีบางเบา สบายตา ป้องกันไม่ให้บังความสวยงามของภาพสไลด์ -->
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/50 pointer-events-none z-10"></div>
+
+    <!-- ================= 2. TOP BAR: ส่วนบนแบบมินิมอล สะอาดตา ================= -->
+    <header class="relative z-20 pt-4 px-4 sm:px-8 flex items-center justify-end gap-3 pointer-events-none">
+        
+        <!-- ตัวบอกลำดับสไลด์ภาพ (Slide Counter Badge) และปุ่มดูเครดิตผู้จัดทำ -->
+        <div class="pointer-events-auto flex items-center space-x-2">
+            <button type="button" onclick="window.replayGameIntro && window.replayGameIntro()"
+                    class="bg-slate-900/70 hover:bg-slate-800 backdrop-blur-md text-sky-300 hover:text-white border border-white/15 px-3 py-1.5 rounded-full text-xs font-mono font-medium shadow-xs transition cursor-pointer flex items-center space-x-1.5"
+                    title="ดูเครดิตผู้พัฒนาโครงงาน">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                <span>CREDITS // ผู้จัดทำ</span>
+            </button>
+            <div id="slideCounterBadge" class="bg-slate-900/70 backdrop-blur-md text-white border border-white/15 px-3 py-1.5 rounded-full text-xs font-mono font-bold shadow-xs">
+                01 / {{ "%02d" % (banners|length if banners else 1) }}
+            </div>
+        </div>
+
+    </header>
+
+    <!-- ================= 3. MAIN CENTER & ACTION AREA: จัดวางปุ่มล็อกอินและสมัครสมาชิกไว้กึ่งกลางหน้าจอ ================= -->
+    <main class="relative z-20 px-4 sm:px-8 py-6 flex flex-col items-center justify-center pointer-events-none flex-1">
+        
+        <div class="pointer-events-auto flex flex-col items-center text-center space-y-4 w-full max-w-md mx-auto">
+            
+            <!-- กลุ่มปุ่มสีฟ้า LOGIN / GAME ENTRY ตรงกลางหน้าจอเด่นชัด (ปุ่มเดียวตามที่ผู้ใช้ต้องการ) -->
+            <div class="flex flex-col items-center space-y-3 w-full sm:w-auto pt-1">
+                
+                <!-- ปุ่ม ENTRY / LOGIN สไตล์เกม Lesson: 01 อยู่กึ่งกลางหน้าจอเพียงปุ่มเดียว -->
+                <button id="openLoginModalBtn" type="button" 
+                        class="w-full sm:w-auto min-w-[280px] sm:min-w-[340px] relative flex items-center justify-center space-x-4 bg-gradient-to-r from-sky-500 via-cheero-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl border-2 border-white/90 shadow-2xl shadow-sky-500/40 transition-all duration-300 transform hover:scale-105 active:scale-95 animate-glow cursor-pointer">
+                    
+                    <!-- ไอคอนประตูกุญแจเกมในกรอบมน -->
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center border border-white/30 flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                    </div>
+
+                    <!-- ข้อความปุ่มใหญ่ตรงกลาง -->
+                    <div class="text-left">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[10px] sm:text-[11px] font-bold text-amber-200 tracking-wider uppercase font-mono">
+                                LESSON : 01 • ENTRY
+                            </span>
+                        </div>
+                        <div class="text-base sm:text-xl font-black tracking-tight text-white uppercase drop-shadow-xs">
+                            {% if current_user %}
+                                เข้าสู่ระบบแล้ว • เข้าสู่เว็บ
+                            {% else %}
+                                เข้าสู่ระบบ / <span>LOGIN</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ลูกศรชี้เข้าเกม -->
+                    <svg class="w-5 h-5 text-white/90 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+
+                <!-- ลิงก์เข้าชมด้วย Guest (ไม่ระบุตัวตน) กึ่งกลาง -->
+                <div>
+                    <button type="button" id="quickGuestBtn" class="text-xs sm:text-sm text-sky-200 hover:text-white font-semibold transition hover:underline cursor-pointer bg-slate-900/60 backdrop-blur-xs px-4 py-1.5 rounded-full border border-white/10">
+                        หรือเข้าชมด้วย Guest (ไม่ระบุตัวตน) →
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ปุ่มลูกศรเลื่อนสไลด์ ซ้าย-ขวา แบบโปร่งแสง สบายตา -->
+    <button id="portalPrevBtn" type="button" 
+            class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/75 hover:bg-white text-slate-800 flex items-center justify-center border border-sky-200 shadow-md transition z-25 cursor-pointer backdrop-blur-xs opacity-70 hover:opacity-100"
+            aria-label="ภาพก่อนหน้า" title="ก่อนหน้า">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+        </svg>
+    </button>
+
+    <button id="portalNextBtn" type="button" 
+            class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/75 hover:bg-white text-slate-800 flex items-center justify-center border border-sky-200 shadow-md transition z-25 cursor-pointer backdrop-blur-xs opacity-70 hover:opacity-100"
+            aria-label="ภาพถัดไป" title="ถัดไป">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+        </svg>
+    </button>
+
+    <!-- ================= 5. POPUP MODAL: เข้าสู่ระบบ & สมัครสมาชิก บนหน้าโปรโมทแบนเนอร์ (เปิด-ปิดได้) ================= -->
+    <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border border-sky-200 shadow-2xl relative transform transition-all animate-modal max-h-[92vh] overflow-y-auto no-scrollbar">
+            
+            <!-- ปุ่มปิดมุมขวาบน -->
+            <button id="closeLoginModal" type="button" 
+                    class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer" 
+                    aria-label="ปิดหน้าต่าง">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <!-- ส่วนหัว Modal -->
+            <div class="text-center mb-4">
+                <div class="w-11 h-11 rounded-2xl bg-sky-50 text-cheero-600 mx-auto flex items-center justify-center mb-2.5 border border-sky-100 shadow-2xs">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" class="w-7 h-7 object-contain" alt="Logo">
+                </div>
+                <h3 class="font-black text-lg sm:text-xl text-slate-900 tracking-tight" id="authModalHeading">
+                    {% if open_modal == 'register' %}สมัครสมาชิกใหม่{% else %}เข้าสู่ระบบ / เข้าชมเว็บไซต์{% endif %}
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">BKB EVENT BOOKING • TOURNAMENT SERVICE</p>
+            </div>
+
+            <!-- กล่องแจ้งเตือน Flash Messages ภายใน Modal -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4 space-y-2">
+                        {% for category, message in messages %}
+                            <div class="p-3 text-xs font-medium rounded-xl border flex items-center justify-between
+                                        {% if category == 'error' %}bg-rose-50 border-rose-200 text-rose-800
+                                        {% elif category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800
+                                        {% else %}bg-sky-50 border-sky-200 text-sky-800{% endif %}">
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- แถบสลับแท็บ เข้าสู่ระบบ / สมัครสมาชิก แบบ Segmented Control -->
+            <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl mb-4 border border-slate-200/60">
+                <button type="button" id="tabBtnLogin" onclick="switchAuthTab('login')"
+                        class="py-2 text-xs font-bold rounded-lg transition-all {% if open_modal != 'register' %}text-slate-800 bg-white shadow-2xs{% else %}text-slate-500 hover:text-slate-800{% endif %} cursor-pointer">
+                    เข้าสู่ระบบ (Login)
+                </button>
+                <button type="button" id="tabBtnRegister" onclick="switchAuthTab('register')"
+                        class="py-2 text-xs font-bold rounded-lg transition-all {% if open_modal == 'register' %}text-slate-800 bg-white shadow-2xs{% else %}text-slate-500 hover:text-slate-800{% endif %} cursor-pointer">
+                    สมัครสมาชิก (Register)
+                </button>
+            </div>
+
+            <!-- ================= แท็บที่ 1: เข้าสู่ระบบ (LOGIN TAB) ================= -->
+            <div id="authLoginTab" class="{% if open_modal == 'register' %}hidden{% endif %} space-y-4">
+                
+                <!-- ตัวเลือก: เข้าชมด้วย Guest (ไม่ระบุตัวตน) -->
+                <div>
+                    <a href="/home" 
+                       class="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-sky-50 to-cheero-50 hover:from-sky-100 hover:to-cheero-100 border border-sky-200 text-slate-800 transition group shadow-2xs">
+                        <div class="flex items-center space-x-3 text-left">
+                            <span class="w-8 h-8 rounded-xl bg-white border border-sky-200 flex items-center justify-center text-cheero-600 flex-shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </span>
+                            <div>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-900 block group-hover:text-cheero-600">
+                                    เข้าชมด้วย Guest (ไม่ระบุตัวตน)
+                                </span>
+                                <span class="text-[11px] text-slate-500 font-normal">
+                                    เข้าชมแคตตาล็อก ตรวจสอบวันว่างได้ทันที
+                                </span>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-cheero-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- เส้นคั่นตัวเลือก -->
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-bold text-slate-400 uppercase font-mono">หรือเข้าสู่ระบบสมาชิก</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <!-- ฟอร์มเข้าสู่ระบบ (Login Form) -->
+                <form action="/login" method="POST" class="space-y-3">
+                    <div>
+                        <label for="modalUsername" class="block text-xs font-bold text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
+                        <input type="text" id="modalUsername" name="username" required placeholder="ใส่ชื่อผู้ใช้ของคุณ"
+                               class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cheero-500 focus:bg-white transition text-slate-800">
+                    </div>
+
+                    <div>
+                        <label for="modalPassword" class="block text-xs font-bold text-slate-700 mb-1">รหัสผ่าน (Password)</label>
+                        <input type="password" id="modalPassword" name="password" required placeholder="ใส่รหัสผ่านของคุณ"
+                               class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cheero-500 focus:bg-white transition text-slate-800">
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full py-3 bg-gradient-to-r from-cheero-500 to-sky-600 hover:from-cheero-600 hover:to-sky-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs shadow-sky-200 transition cursor-pointer">
+                        เข้าสู่ระบบ (Login) →
+                    </button>
+                </form>
+
+                <!-- สลับไปแท็บสมัครสมาชิก -->
+                <div class="text-center pt-3 border-t border-slate-100">
+                    <p class="text-xs text-slate-500">
+                        ยังไม่มีบัญชีผู้ใช้? 
+                        <button type="button" onclick="switchAuthTab('register')" class="font-bold text-cheero-600 hover:underline cursor-pointer">
+                            สมัครสมาชิกใหม่ (Register)
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ================= แท็บที่ 2: สมัครสมาชิก (REGISTER TAB) บนหน้าโปรโมทแบนเนอร์ ================= -->
+            <div id="authRegisterTab" class="{% if open_modal != 'register' %}hidden{% endif %} space-y-3.5">
+                
+                {% if register_step == 2 %}
+                <!-- ขั้นตอนที่ 2: กรอกรหัส OTP ยืนยันตัวตน -->
+                <form action="/register" method="POST" class="space-y-3.5">
+                    <input type="hidden" name="action" value="verify_otp">
+                    
+                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700">
+                        <div class="text-center border-b border-dashed border-slate-200 pb-2 mb-2">
+                            <span class="font-bold text-slate-900 uppercase tracking-wider block">VERIFICATION SLIP</span>
+                            <span class="text-[11px] text-slate-500">ONE-TIME PASSWORD (OTP)</span>
+                        </div>
+                        <div class="space-y-1 text-[11px]">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">ปลายทาง (EMAIL):</span>
+                                <span class="font-bold text-slate-800 truncate max-w-[190px]">{{ email }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">จังหวัด (PROVINCE):</span>
+                                <span class="font-bold text-cheero-600">{{ province }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">อายุการใช้งาน:</span>
+                                <span class="font-bold text-slate-800">5 นาที</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            รหัสยืนยัน OTP (6 หลัก):
+                        </label>
+                        <input type="text" name="otp" required maxlength="6" pattern="[0-9]{6}"
+                               class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-white text-center text-lg tracking-widest font-mono font-bold outline-none focus:ring-2 focus:ring-cheero-500 text-slate-900"
+                               placeholder="••••••">
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition cursor-pointer">
+                        ยืนยันรหัส OTP และสร้างบัญชี →
+                    </button>
+
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                        <a href="/register" class="hover:text-slate-800 underline">
+                            ← กลับไปแก้ไขข้อมูล
+                        </a>
+                        <button type="submit" form="resendOtpForm" class="text-cheero-600 font-bold hover:underline cursor-pointer">
+                            ขอรหัส OTP ใหม่
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ฟอร์มขอ OTP ใหม่อีกครั้ง -->
+                <form id="resendOtpForm" action="/register" method="POST" style="display:none;">
+                    <input type="hidden" name="action" value="request_otp">
+                    <input type="hidden" name="username" value="{{ temp_reg.username if temp_reg else '' }}">
+                    <input type="hidden" name="password" value="{{ temp_reg.password if temp_reg else '' }}">
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <input type="hidden" name="province" value="{{ province }}">
+                </form>
+
+                {% else %}
+                <!-- ขั้นตอนที่ 1: กรอกข้อมูลลงทะเบียนเพื่อขอรหัส OTP -->
+                <form action="/register" method="POST" class="space-y-3">
+                    <input type="hidden" name="action" value="request_otp">
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            ชื่อผู้ใช้ (Username): <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="username" value="{{ reg_username or '' }}" required placeholder="เช่น player_one"
+                               class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cheero-500 focus:bg-white transition text-slate-800">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            รหัสผ่าน (Password): <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="password" id="modalRegisterPassword" name="password" required placeholder="ความยาว 8+ ตัว (A-Z, a-z, 0-9, อักขระพิเศษ)"
+                               class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cheero-500 focus:bg-white transition text-slate-800">
+                        
+                        <!-- รายการตรวจสอบความปลอดภัยของรหัสผ่านแบบ Real-time -->
+                        <div class="mt-2 p-2.5 bg-slate-100/70 border border-slate-200 rounded-lg text-[11px] font-mono space-y-1">
+                            <div class="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">เกณฑ์ความปลอดภัยรหัสผ่าน:</div>
+                            <div class="flex items-center space-x-1.5" id="pwdRuleLen">
+                                <span class="w-1.5 h-1.5 bg-slate-400 rule-dot"></span>
+                                <span class="rule-txt text-slate-500">ความยาวอย่างน้อย 8 ตัวอักษร</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5" id="pwdRuleUpper">
+                                <span class="w-1.5 h-1.5 bg-slate-400 rule-dot"></span>
+                                <span class="rule-txt text-slate-500">ตัวพิมพ์ใหญ่ (A - Z) อย่างน้อย 1 ตัว</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5" id="pwdRuleLower">
+                                <span class="w-1.5 h-1.5 bg-slate-400 rule-dot"></span>
+                                <span class="rule-txt text-slate-500">ตัวพิมพ์เล็ก (a - z) อย่างน้อย 1 ตัว</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5" id="pwdRuleNumber">
+                                <span class="w-1.5 h-1.5 bg-slate-400 rule-dot"></span>
+                                <span class="rule-txt text-slate-500">ตัวเลข (0 - 9) อย่างน้อย 1 ตัว</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5" id="pwdRuleSpecial">
+                                <span class="w-1.5 h-1.5 bg-slate-400 rule-dot"></span>
+                                <span class="rule-txt text-slate-500">อักขระพิเศษ (!@#$%^&*_-) อย่างน้อย 1 ตัว</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            อีเมลสำหรับรับ OTP: <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="email" name="email" value="{{ reg_email or '' }}" required placeholder="your_email@example.com"
+                               class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cheero-500 focus:bg-white transition text-slate-800">
+                        <span class="text-[10px] text-slate-400 mt-0.5 block">ระบบจะส่งรหัสยืนยัน OTP 6 หลักไปยังอีเมลนี้</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            จังหวัดของผู้จัดงาน (Province): <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="province" required
+                                class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cheero-500 focus:bg-white transition text-slate-800">
+                            {% for p in provinces %}
+                                <option value="{{ p }}" {% if p == (province or 'ขอนแก่น') %}selected{% endif %}>{{ p }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-cheero-600 hover:from-sky-600 hover:to-cheero-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition cursor-pointer mt-1">
+                        ส่งรหัส OTP ไปยังอีเมล →
+                    </button>
+                </form>
+
+                <!-- สลับไปแท็บเข้าสู่ระบบ -->
+                <div class="text-center pt-3 border-t border-slate-100">
+                    <p class="text-xs text-slate-500">
+                        มีบัญชีผู้ใช้งานอยู่แล้ว? 
+                        <button type="button" onclick="switchAuthTab('login')" class="font-bold text-cheero-600 hover:underline cursor-pointer">
+                            เข้าสู่ระบบที่นี่ (Login)
+                        </button>
+                    </p>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- ================= 7. JAVASCRIPT: ระบบสไลเดอร์ + ควบคุม MODAL ================= -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 1. สไลเดอร์พื้นหลัง ---
+        const track = document.getElementById('portalBgTrack');
+        const prevBtn = document.getElementById('portalPrevBtn');
+        const nextBtn = document.getElementById('portalNextBtn');
+        const counterBadge = document.getElementById('slideCounterBadge');
+        const slides = document.querySelectorAll('.portal-slide');
+        const totalSlides = slides.length;
+        let currentIndex = 0;
+        let autoSlideTimer = null;
+
+        function padZero(num) {
+            return num < 10 ? '0' + num : num;
+        }
+
+        function updateSlide(index) {
+            if (totalSlides <= 0) return;
+            if (totalSlides <= 1) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+            }
+
+            if (index < 0) {
+                currentIndex = totalSlides - 1;
+            } else if (index >= totalSlides) {
+                currentIndex = 0;
+            } else {
+                currentIndex = index;
+            }
+
+            if (track) {
+                track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+            }
+            if (counterBadge) {
+                counterBadge.textContent = padZero(currentIndex + 1) + ' / ' + padZero(totalSlides);
+            }
+        }
+
+        function startAutoSlide() {
+            if (totalSlides <= 1) return;
+            stopAutoSlide();
+            autoSlideTimer = setInterval(function() {
+                updateSlide(currentIndex + 1);
+            }, 5500);
+        }
+
+        function stopAutoSlide() {
+            if (autoSlideTimer) {
+                clearInterval(autoSlideTimer);
+                autoSlideTimer = null;
+            }
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function() {
+                updateSlide(currentIndex - 1);
+                startAutoSlide();
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                updateSlide(currentIndex + 1);
+                startAutoSlide();
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                updateSlide(currentIndex - 1);
+                startAutoSlide();
+            } else if (e.key === 'ArrowRight') {
+                updateSlide(currentIndex + 1);
+                startAutoSlide();
+            }
+        });
+
+        startAutoSlide();
+
+        // --- 2. AUTH MODAL (เข้าสู่ระบบ & สมัครสมาชิก บนหน้าโปรโมทแบนเนอร์) ---
+        const authModal = document.getElementById('loginModal');
+        const openLoginBtn = document.getElementById('openLoginModalBtn');
+        const closeAuthBtn = document.getElementById('closeLoginModal');
+        const quickGuestBtn = document.getElementById('quickGuestBtn');
+
+        const tabBtnLogin = document.getElementById('tabBtnLogin');
+        const tabBtnRegister = document.getElementById('tabBtnRegister');
+        const tabContentLogin = document.getElementById('authLoginTab');
+        const tabContentRegister = document.getElementById('authRegisterTab');
+        const authModalHeading = document.getElementById('authModalHeading');
+
+        const isUserLoggedIn = {% if current_user %}true{% else %}false{% endif %};
+
+        function switchAuthTab(tab) {
+            if (tab === 'register') {
+                if (tabBtnRegister) {
+                    tabBtnRegister.classList.add('bg-white', 'text-slate-800', 'shadow-2xs');
+                    tabBtnRegister.classList.remove('text-slate-500');
+                }
+                if (tabBtnLogin) {
+                    tabBtnLogin.classList.remove('bg-white', 'text-slate-800', 'shadow-2xs');
+                    tabBtnLogin.classList.add('text-slate-500');
+                }
+                if (tabContentRegister) tabContentRegister.classList.remove('hidden');
+                if (tabContentLogin) tabContentLogin.classList.add('hidden');
+                if (authModalHeading) authModalHeading.textContent = 'สมัครสมาชิกใหม่';
+            } else {
+                if (tabBtnLogin) {
+                    tabBtnLogin.classList.add('bg-white', 'text-slate-800', 'shadow-2xs');
+                    tabBtnLogin.classList.remove('text-slate-500');
+                }
+                if (tabBtnRegister) {
+                    tabBtnRegister.classList.remove('bg-white', 'text-slate-800', 'shadow-2xs');
+                    tabBtnRegister.classList.add('text-slate-500');
+                }
+                if (tabContentLogin) tabContentLogin.classList.remove('hidden');
+                if (tabContentRegister) tabContentRegister.classList.add('hidden');
+                if (authModalHeading) authModalHeading.textContent = 'เข้าสู่ระบบ / เข้าชมเว็บไซต์';
+            }
+        }
+        window.switchAuthTab = switchAuthTab;
+
+        function showAuthModal(initialTab) {
+            if (isUserLoggedIn) {
+                window.location.href = '/home';
+                return;
+            }
+            if (initialTab) {
+                switchAuthTab(initialTab);
+            }
+            if (authModal) {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+            }
+        }
+
+        function hideAuthModal() {
+            if (authModal) {
+                authModal.classList.add('hidden');
+                authModal.classList.remove('flex');
+            }
+        }
+
+        if (openLoginBtn) {
+            openLoginBtn.addEventListener('click', function() {
+                showAuthModal('login');
+            });
+        }
+        if (closeAuthBtn) closeAuthBtn.addEventListener('click', hideAuthModal);
+
+        if (quickGuestBtn) {
+            quickGuestBtn.addEventListener('click', function() {
+                window.location.href = '/home';
+            });
+        }
+
+        if (authModal) {
+            authModal.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    hideAuthModal();
+                }
+            });
+        }
+
+        // กด Escape เพื่อปิด Modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideAuthModal();
+            }
+        });
+
+        // ตรวจสอบความถูกต้องของรหัสผ่านแบบ Real-time
+        const regPwdInput = document.getElementById('modalRegisterPassword');
+        if (regPwdInput) {
+            regPwdInput.addEventListener('input', function() {
+                const val = this.value;
+                const checks = [
+                    { id: 'pwdRuleLen', ok: val.length >= 8 },
+                    { id: 'pwdRuleUpper', ok: /[A-Z]/.test(val) },
+                    { id: 'pwdRuleLower', ok: /[a-z]/.test(val) },
+                    { id: 'pwdRuleNumber', ok: /[0-9]/.test(val) },
+                    { id: 'pwdRuleSpecial', ok: /[^a-zA-Z0-9]/.test(val) }
+                ];
+                checks.forEach(function(c) {
+                    const el = document.getElementById(c.id);
+                    if (el) {
+                        const dot = el.querySelector('.rule-dot');
+                        const txt = el.querySelector('.rule-txt');
+                        if (c.ok) {
+                            if (dot) dot.className = 'w-1.5 h-1.5 bg-emerald-600 rule-dot';
+                            if (txt) txt.className = 'rule-txt text-emerald-700 font-bold';
+                        } else {
+                            if (dot) dot.className = 'w-1.5 h-1.5 bg-slate-400 rule-dot';
+                            if (txt) txt.className = 'rule-txt text-slate-500';
+                        }
+                    }
+                });
+            });
+        }
+
+        // เปิด Modal อัตโนมัติหากมีพารามิเตอร์ส่งมา เช่น หลังส่ง OTP หรือมาจากการกดลิงก์
+        const initialModalTarget = '{{ open_modal or "" }}';
+        if (initialModalTarget === 'register') {
+            showAuthModal('register');
+        } else if (initialModalTarget === 'login') {
+            showAuthModal('login');
+        }
+    });
+    </script>
+
+    <!-- อินโทรเปิดตัวสไตล์เกม และ เครดิตผู้พัฒนาโครงงาน -->
+    {% include 'intro_splash.html' %}
+</body>
+</html>

@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}ใบเสร็จรับเงิน / ใบกำกับภาษี - {{ booking.invoice_no }} | BKB EVENT BOOKING{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Corporate Tax Invoice Typography: Sarabun / TH Sarabun New with Tabular Numerals */
+    .doc-sarabun {
+        font-family: 'Sarabun', 'TH Sarabun New', -apple-system, BlinkMacSystemFont, Tahoma, Arial, sans-serif;
+    }
+    .num-tabular {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+    }
+
+    @media print {
+        header, footer, #officialTopBar, .no-print, #drawer, #drawerBackdrop {
+            display: none !important;
+        }
+        body {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .invoice-card {
+            border: none !important;
+            box-shadow: none !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .full-format-container {
+            display: block !important;
+        }
+        .abb-format-container {
+            display: none !important;
+        }
+        body.print-abb .full-format-container {
+            display: none !important;
+        }
+        body.print-abb .abb-format-container {
+            display: block !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-10 doc-sarabun">
+
+    <!-- 1. แถบควบคุมมุมมองและพิมพ์เอกสาร (ซ่อนอัตโนมัติในโหมดพิมพ์) -->
+    <div class="no-print bg-white p-4 border border-slate-300 shadow-2xs mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- ฝั่งซ้าย: ปุ่มย้อนกลับ -->
+            <div class="flex items-center space-x-2">
+                <a href="/my-bookings" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-semibold border border-slate-300 font-mono transition">
+                    [<-] ประวัติการจองของฉัน
+                </a>
+                {% if current_user and current_user.role == 'admin' %}
+                <a href="/admin/bookings" class="px-3.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs sm:text-sm font-semibold border border-amber-300 font-mono transition">
+                    กลับหน้าจัดการของแอดมิน
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- ตรงกลาง: ปุ่มสลับรูปแบบเอกสาร (แบบเต็มรูป vs แบบอย่างย่อ ABB) -->
+            <div class="inline-flex rounded border border-slate-300 bg-slate-100 p-1 text-xs font-semibold">
+                <button type="button" id="btnShowFull" onclick="switchInvoiceMode('full')"
+                        class="px-4 py-1.5 rounded-sm bg-white text-slate-900 shadow-2xs border border-slate-200 transition cursor-pointer">
+                    ใบเสร็จรับเงิน/ใบกำกับภาษีเต็มรูป (ม.86/4)
+                </button>
+                <button type="button" id="btnShowAbb" onclick="switchInvoiceMode('abb')"
+                        class="px-4 py-1.5 rounded-sm text-slate-600 hover:text-slate-900 transition cursor-pointer">
+                    ใบกำกับภาษีอย่างย่อ (TAX INVOICE ABB)
+                </button>
+            </div>
+
+            <!-- ฝั่งขวา: ปุ่มพิมพ์ / บันทึก PDF -->
+            <div class="flex items-center space-x-2">
+                <button onclick="handlePrint()" 
+                        class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold border border-slate-900 transition flex items-center space-x-2 cursor-pointer shadow-2xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    <span>พิมพ์เอกสาร / บันทึก PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+            <div>
+                สถานะเอกสาร: <span id="currentModeLabel" class="font-bold text-slate-800">ต้นฉบับใบเสร็จรับเงิน/ใบกำกับภาษีเต็มรูป (อ้างอิงตาม ป.พ.พ. และประมวลรัษฎากร ม.86/4)</span>
+            </div>
+            <div class="text-[11px] text-emerald-800 font-semibold font-mono">
+                ระบบอิเล็กทรอนิกส์ e-Tax Invoice &amp; e-Receipt กรมสรรพากร
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= 2. รูปแบบที่ 1: แบบเต็มรูปทางการ (FORMAL CORPORATE TAX INVOICE & RECEIPT) ================= -->
+    <div id="fullInvoiceView" class="full-format-container invoice-card bg-white border border-slate-300 p-8 sm:p-12 shadow-sm text-slate-900 max-w-[840px] mx-auto">
+        
+        <!-- ส่วนหัวเอกสารทางการ: 2 ฝั่งซ้าย-ขวา -->
+        <div class="flex flex-col sm:flex-row justify-between items-start pb-4 border-b-2 border-slate-900 gap-4">
+            <!-- ฝั่งซ้าย: ข้อมูลนิติบุคคลผู้ออกเอกสาร -->
+            <div class="space-y-0.5 text-xs text-slate-800 max-w-lg">
+                <div class="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                    บริษัท บีเคบี อีเวนต์ บุ๊คกิ้ง จำกัด (สำนักงานใหญ่)
+                </div>
+                <div class="text-xs font-semibold text-slate-700 tracking-normal">
+                    BKB EVENT BOOKING CO., LTD. (HEAD OFFICE)
+                </div>
+                <div class="text-[12px] text-slate-600 pt-1 leading-relaxed">
+                    123 ศูนย์กีฬาและสุขภาพ มหาวิทยาลัยขอนแก่น ถนนมิตรภาพ ตำบลในเมือง อำเภอเมืองขอนแก่น จังหวัดขอนแก่น 40002
+                </div>
+                <div class="text-[12px] text-slate-600">
+                    โทรศัพท์: <span class="font-mono text-slate-900 font-semibold">091-830-3564</span> | โทรสาร: <span class="font-mono text-slate-900">043-000-000</span>
+                </div>
+                <div class="text-[12px] font-bold text-slate-900 pt-0.5">
+                    เลขประจำตัวผู้เสียภาษีอากร: <span class="font-mono tracking-wider font-bold">*********</span> (สำนักงานใหญ่)
+                </div>
+            </div>
+
+            <!-- ฝั่งขวา: ชื่อเอกสารทางการ และสถานะต้นฉบับ -->
+            <div class="text-left sm:text-right flex-shrink-0 space-y-1">
+                <div class="inline-block border border-slate-900 px-2.5 py-0.5 text-[11px] font-bold tracking-wider font-mono text-slate-900 uppercase">
+                    ต้นฉบับ / ORIGINAL
+                </div>
+                <div class="text-[11px] text-slate-600 font-medium">
+                    เอกสารออกเป็นชุด (ISSUED AS A SET)
+                </div>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-950 tracking-tight pt-1">
+                    ใบเสร็จรับเงิน / ใบกำกับภาษี
+                </h1>
+                <div class="text-xs font-bold text-slate-600 tracking-wider font-mono">
+                    RECEIPT / TAX INVOICE
+                </div>
+                <div class="text-[11px] text-slate-500 font-medium">
+                    (ตามประมวลรัษฎากร มาตรา 86/4)
+                </div>
+            </div>
+        </div>
+
+        <!-- กล่องข้อมูล 2 กล่องคู่ขนาน: ข้อมูลผู้ซื้อ/ผู้รับบริการ vs ข้อมูลเอกสาร -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-5 text-xs">
+            <!-- กล่องซ้าย: ข้อมูลผู้ซื้อ / ผู้รับบริการ -->
+            <div class="border border-slate-700 bg-white">
+                <div class="bg-slate-100 px-3 py-1.5 font-bold text-slate-900 border-b border-slate-700 uppercase tracking-wider text-[11px] flex justify-between items-center">
+                    <span>ข้อมูลผู้ซื้อ / ผู้รับบริการ (CUSTOMER DETAILS)</span>
+                </div>
+                <div class="p-3.5 space-y-1.5 text-slate-800 text-[12px]">
+                    <div class="flex">
+                        <span class="w-28 text-slate-500 flex-shrink-0">ชื่อผู้ซื้อ / องค์กร:</span>
+                        <span class="font-bold text-slate-950">{{ user.fullname or user.username }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-28 text-slate-500 flex-shrink-0">รหัสผู้ใช้งาน:</span>
+                        <span class="font-mono text-slate-700">@{{ booking.username }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-28 text-slate-500 flex-shrink-0">ที่อยู่ / จังหวัด:</span>
+                        <span class="text-slate-900">จังหวัด{{ user.province or 'ขอนแก่น' }} 40000</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-28 text-slate-500 flex-shrink-0">เลขประจำตัวผู้เสียภาษี:</span>
+                        <span class="font-mono text-slate-900 font-semibold tracking-wider">01055xxxxxxxx</span>
+                        <span class="text-slate-500 text-[11px] ml-1">(สำนักงานใหญ่)</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-28 text-slate-500 flex-shrink-0">โทรศัพท์ / อีเมล:</span>
+                        <span class="font-mono text-slate-900">{{ user.phone or '-' }}</span>
+                        <span class="text-slate-400 mx-1.5">|</span>
+                        <span class="font-mono text-slate-700 truncate">{{ user.email or '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- กล่องขวา: ข้อมูลเอกสารและการจัดงาน -->
+            <div class="border border-slate-700 bg-white">
+                <div class="bg-slate-100 px-3 py-1.5 font-bold text-slate-900 border-b border-slate-700 uppercase tracking-wider text-[11px] flex justify-between items-center">
+                    <span>ข้อมูลเอกสารและบริการ (DOCUMENT DETAILS)</span>
+                </div>
+                <div class="p-3.5 space-y-1.5 text-slate-800 text-[12px]">
+                    <div class="flex">
+                        <span class="w-32 text-slate-500 flex-shrink-0">เลขที่ใบกำกับภาษี:</span>
+                        <span class="font-mono font-bold text-slate-950 tracking-wider text-[13px]">{{ booking.invoice_no }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 text-slate-500 flex-shrink-0">วันที่ออกเอกสาร:</span>
+                        <span class="font-mono text-slate-900 font-semibold">{{ booking.created_at[:10] if booking.created_at else '-' }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 text-slate-500 flex-shrink-0">วันจัดงาน / การแข่งขัน:</span>
+                        <span class="font-mono font-bold text-slate-900">{{ booking.event_date }}</span>
+                        <span class="text-slate-500 text-[11px] ml-1.5">({{ booking.event_time or '09:00 - 17:00 น.' }})</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 text-slate-500 flex-shrink-0">สถานที่จัดการแข่งขัน:</span>
+                        <span class="text-slate-900 font-medium">{{ booking.venue }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 text-slate-500 flex-shrink-0">รหัสอ้างอิงระบบ:</span>
+                        <span class="font-mono text-slate-600 text-[11px]">BKB-BOOKING-REF#{{ booking.id }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ตารางรายการสินค้าและบริการ (Itemized Ledger Table) -->
+        <div class="overflow-x-auto mb-5">
+            <table class="w-full text-xs border border-slate-900 border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-900 border-b border-slate-900">
+                        <th class="py-2 px-2 text-center border-r border-slate-900 w-12 font-bold">ลำดับ<br><span class="text-[10px] font-normal text-slate-600">ITEM</span></th>
+                        <th class="py-2 px-3 text-left border-r border-slate-900 font-bold">รายการสินค้า / รายละเอียดการบริการ<br><span class="text-[10px] font-normal text-slate-600">DESCRIPTION</span></th>
+                        <th class="py-2 px-2 text-center border-r border-slate-900 w-20 font-bold">จำนวน<br><span class="text-[10px] font-normal text-slate-600">QTY</span></th>
+                        <th class="py-2 px-3 text-right border-r border-slate-900 w-32 font-bold">ราคาต่อหน่วย (ไม่รวม VAT)<br><span class="text-[10px] font-normal text-slate-600">UNIT PRICE</span></th>
+                        <th class="py-2 px-3 text-right w-36 font-bold">จำนวนเงิน (ไม่รวม VAT)<br><span class="text-[10px] font-normal text-slate-600">AMOUNT (THB)</span></th>
+                    </tr>
+                </thead>
+                <tbody class="text-[12px]">
+                    <tr class="border-b border-slate-900">
+                        <td class="py-3 px-2 text-center font-mono border-r border-slate-900 align-top">1</td>
+                        <td class="py-3 px-3 border-r border-slate-900 align-top">
+                            <div class="font-bold text-slate-950">{{ booking.package_name }}</div>
+                            <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                                บริการจัดการแข่งขันบาสเกตบอล พร้อมอุปกรณ์มาตรฐาน โต๊ะเทคนิค กรรมการสมาคมฯ และการบริหารจัดการสนามแข่งขัน
+                            </div>
+                        </td>
+                        <td class="py-3 px-2 text-center font-mono border-r border-slate-900 align-top">1 งาน</td>
+                        <td class="py-3 px-3 text-right font-mono border-r border-slate-900 num-tabular align-top">฿{{ "{:,.2f}".format(base_no_vat) }}</td>
+                        <td class="py-3 px-3 text-right font-mono font-bold text-slate-950 num-tabular align-top">฿{{ "{:,.2f}".format(base_no_vat) }}</td>
+                    </tr>
+                    {% if booking.options_list %}
+                    <tr class="border-b border-slate-900">
+                        <td class="py-3 px-2 text-center font-mono border-r border-slate-900 align-top">2</td>
+                        <td class="py-3 px-3 border-r border-slate-900 align-top">
+                            <div class="font-bold text-slate-950">ออพชั่นเสริมและอุปกรณ์เทคนิคการแข่งขัน</div>
+                            <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">{{ ', '.join(booking.options_list) }}</div>
+                        </td>
+                        <td class="py-3 px-2 text-center font-mono border-r border-slate-900 align-top">1 ชุด</td>
+                        <td class="py-3 px-3 text-right font-mono border-r border-slate-900 num-tabular align-top">฿{{ "{:,.2f}".format(extra_no_vat) }}</td>
+                        <td class="py-3 px-3 text-right font-mono font-bold text-slate-950 num-tabular align-top">฿{{ "{:,.2f}".format(extra_no_vat) }}</td>
+                    </tr>
+                    {% endif %}
+
+                    <!-- ส่วนสรุปท้ายตารางคำนวณเงินและภาษีมูลค่าเพิ่ม 7% -->
+                    <tr class="border-b border-slate-900">
+                        <td colspan="3" rowspan="2" class="py-3 px-4 border-r border-slate-900 align-middle bg-slate-50">
+                            <div class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+                                จำนวนเงินรวมทั้งสิ้น (ตัวอักษร) / TOTAL AMOUNT IN WORDS:
+                            </div>
+                            <div class="font-bold text-slate-950 text-sm mt-1">
+                                ({{ baht_total }})
+                            </div>
+                        </td>
+                        <td class="py-2 px-3 text-right border-r border-slate-900 font-semibold text-slate-700 text-xs">ราคารวมเงินทั้งสิ้น (Subtotal Excl. VAT):</td>
+                        <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 num-tabular text-xs">฿{{ "{:,.2f}".format(subtotal_no_vat) }}</td>
+                    </tr>
+                    <tr class="border-b border-slate-900">
+                        <td class="py-2 px-3 text-right border-r border-slate-900 font-semibold text-slate-700 text-xs">ภาษีมูลค่าเพิ่ม (VAT 7%):</td>
+                        <td class="py-2 px-3 text-right font-mono font-bold text-slate-900 num-tabular text-xs">฿{{ "{:,.2f}".format(vat_amount) }}</td>
+                    </tr>
+                    <tr class="border-b border-slate-900 bg-slate-100 font-bold">
+                        <td colspan="3" class="py-2.5 px-4 border-r border-slate-900 text-[11px] text-slate-700">
+                            <span class="text-emerald-900 font-bold">หัก เงินมัดจำชำระแล้วผ่านระบบ (PromptPay 091-830-3564):</span>
+                            <span class="font-mono text-emerald-900 ml-1.5 num-tabular">-฿{{ "{:,.2f}".format(booking.deposit_amount) }}</span>
+                            <span class="text-[11px] text-slate-500 font-normal ml-1">({{ baht_deposit }})</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-right border-r border-slate-900 text-slate-950 text-xs">จำนวนเงินรวมภาษีทั้งสิ้น (Grand Total):</td>
+                        <td class="py-2.5 px-3 text-right font-mono text-sm text-slate-950 num-tabular">฿{{ "{:,}".format(booking.total_price) }}</td>
+                    </tr>
+                    <tr class="border-b border-slate-900 bg-rose-50/70 font-bold">
+                        <td colspan="3" class="py-2 px-4 border-r border-slate-900 text-[11px] text-rose-900">
+                            * หมายเหตุ: ยอดคงค้างชำระ ณ จุดลงทะเบียนสนามแข่งขันในวันจัดงานจริง
+                        </td>
+                        <td class="py-2 px-3 text-right border-r border-slate-900 text-rose-900 text-xs font-bold">ยอดคงค้างวันงาน (Remaining Balance):</td>
+                        <td class="py-2 px-3 text-right font-mono text-sm text-rose-900 num-tabular">฿{{ "{:,.2f}".format(remaining_balance) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- กล่องด้านล่าง 3 ส่วน: ผู้รับเงิน (ผู้จัดงาน) | ช่องทางชำระเงิน | ผู้จ่ายเงิน/ผู้เบิกงบ (ลูกค้า) -->
+        <div class="border border-slate-900 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-900 text-xs bg-white">
+            
+            <!-- คอลัมน์ที่ 1: ฝั่งผู้จัดงาน / ผู้รับเงิน (Organizer / Collector) -->
+            <div class="p-4 sm:p-5 flex flex-col justify-between text-center min-h-[175px]">
+                <div>
+                    <div class="h-14 flex items-end justify-center mb-1">
+                        <img src="/static/images/signature.png" alt="ลายเซ็นผู้รับเงิน" class="h-12 w-auto object-contain pointer-events-none select-none">
+                    </div>
+                    <div class="w-44 border-b border-dotted border-slate-900 mx-auto mb-1.5"></div>
+                    <div class="font-bold text-slate-950 text-[13px]">ผู้รับเงิน (Collector)</div>
+                    <div class="text-slate-600 text-[11px] mt-0.5">(ฝ่ายการเงินและการจัดการแข่งขัน BKB EVENT)</div>
+                </div>
+                <div class="text-[11px] text-slate-500 font-mono pt-3 border-t border-slate-100 mt-2">
+                    วันที่/Date: {{ booking.created_at[:10] if booking.created_at else '-' }}
+                </div>
+            </div>
+
+            <!-- คอลัมน์ที่ 2: ชำระเงินโดย (Paid By) -->
+            <div class="p-4 sm:p-5 space-y-1.5 text-[11px] text-slate-800">
+                <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 mb-2 uppercase tracking-wider text-[11px]">
+                    ชำระเงินโดย (PAID BY):
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-4 h-4 border border-slate-900 flex items-center justify-center font-bold text-xs bg-slate-900 text-white font-mono">X</span>
+                    <span class="font-bold text-slate-900">โอนเงิน (Transfer)</span>
+                    <span class="text-slate-500 font-mono text-[11px]">พร้อมเพย์ 091-830-3564</span>
+                </div>
+                <div class="flex items-center space-x-2 text-slate-400">
+                    <span class="w-4 h-4 border border-slate-400 inline-block"></span>
+                    <span>เงินสด (Cash)</span>
+                </div>
+                <div class="flex items-center space-x-2 text-slate-400">
+                    <span class="w-4 h-4 border border-slate-400 inline-block"></span>
+                    <span>เช็คธนาคาร (Cheque Bank)</span>
+                </div>
+                <div class="pt-2 text-[11px] font-mono text-slate-600 border-t border-slate-200 mt-2 space-y-0.5">
+                    <div>ธนาคาร: พร้อมเพย์ • เลขที่อ้างอิง: {{ booking.invoice_no }}-TXN</div>
+                    <div>วันที่ชำระ: {{ booking.created_at[:10] if booking.created_at else '-' }}</div>
+                </div>
+            </div>
+
+            <!-- คอลัมน์ที่ 3: ฝั่งผู้รับบริการ / ผู้จ่ายเงิน / ผู้เบิกงบ (Customer / Payer / Reimbursed By) -->
+            <div class="p-4 sm:p-5 flex flex-col justify-between text-center min-h-[175px]">
+                <div>
+                    <!-- พื้นที่ว่างสำหรับลงลายมือชื่อผู้จ่ายเงิน/ผู้ขอเบิกจ่ายงบประมาณ -->
+                    <div class="h-14 flex items-end justify-center mb-1">
+                        <!-- Blank space for customer signature -->
+                    </div>
+                    <div class="w-44 border-b border-dashed border-slate-900 mx-auto mb-1.5"></div>
+                    <div class="font-bold text-slate-950 text-[13px]">ผู้จ่ายเงิน / ผู้รับบริการ / ผู้เบิกงบ</div>
+                    <div class="text-slate-600 text-[11px] mt-0.5">(สำหรับใช้ประกอบการเบิกจ่าย / ตัวแทนหน่วยงาน)</div>
+                    <div class="text-slate-800 text-[11px] font-semibold mt-0.5">({{ user.fullname or user.username }})</div>
+                </div>
+                <div class="text-[11px] text-slate-500 font-mono pt-3 border-t border-slate-100 mt-2">
+                    วันที่/Date: ....................................
+                </div>
+            </div>
+        </div>
+
+        <!-- นโยบายการคุ้มครองและการคืนเงินมัดจำทางการค้า -->
+        <div class="mt-5 p-3.5 bg-slate-50 border border-slate-300 text-[11px] text-slate-700 leading-relaxed font-sans">
+            <span class="font-bold text-slate-950 font-mono">เงื่อนไขและการคุ้มครองการจอง (REFUND POLICY):</span> 
+            หากท่านชำระเงินมัดจำแล้ว และทางผู้จัดมีความจำเป็นต้องปฏิเสธการจองเนื่องจากกรณีวันดังกล่าวบุคลากรหรือกรรมการตัดสินไม่เพียงพอ ทางผู้จัดจะทำการคืนเงินมัดจำเต็มจำนวนทุกกรณี ภายในเวลาทำการ 3 - 5 วัน
+        </div>
+
+        <!-- ข้อความกำกับตามกฎหมาย e-Tax Invoice สรรพากร -->
+        <div class="mt-4 pt-3 border-t border-slate-200 text-[11px] text-slate-500 text-center font-mono leading-relaxed">
+            เอกสารนี้ได้จัดทำและส่งข้อมูลให้แก่กรมสรรพากรด้วยวิธีการทางอิเล็กทรอนิกส์ (e-Tax Invoice &amp; e-Receipt) • บริษัท บีเคบี อีเวนต์ บุ๊คกิ้ง จำกัด
+        </div>
+    </div>
+
+
+    <!-- ================= 3. รูปแบบที่ 2: แบบอย่างย่อ (TAX INVOICE ABB สลิปมาตรฐานทางการค้า) ================= -->
+    <div id="abbInvoiceView" class="abb-format-container invoice-card hidden max-w-md mx-auto bg-white border border-slate-400 p-6 sm:p-8 shadow-sm text-slate-900 font-mono text-xs">
+        
+        <!-- แถวบน: เลขที่ และ วันที่ -->
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-dashed border-slate-400">
+            <div>
+                <span class="font-bold text-slate-950">เลขที่ ABB-{{ booking.invoice_no.replace('INV-', '') }}</span>
+            </div>
+            <div>
+                <span class="font-bold text-slate-950">วันที่ {{ booking.created_at[:10] if booking.created_at else '-' }}</span>
+            </div>
+        </div>
+
+        <!-- ข้อมูลบริษัทผู้ออก -->
+        <div class="text-center py-2 space-y-1">
+            <h2 class="text-sm sm:text-base font-bold text-slate-950">บริษัท บีเคบี อีเวนต์ บุ๊คกิ้ง จำกัด</h2>
+            <div class="text-[11px] text-slate-600">เลขที่ 123 ศูนย์กีฬาและสุขภาพ มหาวิทยาลัยขอนแก่น</div>
+            <div class="text-[11px] text-slate-600">ถ.มิตรภาพ ต.ในเมือง อ.เมือง จ.ขอนแก่น 40002</div>
+            <div class="text-[11px] text-slate-600">โทร. 091 830 3564 &nbsp; 043 000 000</div>
+            
+            <div class="pt-1">
+                <span class="font-bold text-slate-950">เลขประจำตัวผู้เสียภาษี : *********</span>
+            </div>
+            <div class="text-[11px] text-slate-500">เลขที่เครื่อง : 3011921982</div>
+        </div>
+
+        <!-- หัวเอกสารอย่างย่อ -->
+        <div class="text-center my-3">
+            <div class="font-bold text-slate-950 uppercase tracking-wider text-xs">
+                TAX INVOICE (ABB)
+            </div>
+            <div class="text-[10px] text-slate-500 mt-0.5">ใบกำกับภาษีอย่างย่อ</div>
+        </div>
+
+        <!-- เส้นประคั่นตาราง -->
+        <div class="border-t border-dashed border-slate-900 my-2"></div>
+        <div class="flex justify-between py-1 font-bold text-slate-800">
+            <span>สินค้า</span>
+            <span>ภาษี</span>
+            <span>รวม</span>
+        </div>
+        <div class="border-b border-dashed border-slate-900 mb-2"></div>
+
+        <!-- รายการสินค้าและบริการ -->
+        <div class="py-1 mb-2 space-y-1">
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900">1 {{ booking.package_name }}</span>
+                <span class="font-mono text-slate-600">V</span>
+                <span class="font-bold font-mono">฿{{ "{:,.2f}".format(booking.total_price) }}</span>
+            </div>
+            {% if booking.options_list %}
+            <div class="flex items-center justify-between text-[11px] text-slate-600 pl-4">
+                <span>• {{ ', '.join(booking.options_list) }}</span>
+                <span class="font-mono text-slate-600">V</span>
+                <span>(รวมในราคา)</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="border-b border-dashed border-slate-900 my-2"></div>
+
+        <!-- สรุปตัวเลขคำนวณ -->
+        <div class="space-y-1 py-1 text-slate-800">
+            <div class="flex justify-between">
+                <span>1 รายการ 1 งาน</span>
+                <span>รวม</span>
+                <span class="font-bold font-mono">฿{{ "{:,.2f}".format(booking.total_price) }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+                <span>ภาษี 7%</span>
+                <span class="font-mono">฿{{ "{:,.2f}".format(vat_amount) }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+                <span>มูลค่าสินค้า</span>
+                <span class="font-mono">฿{{ "{:,.2f}".format(subtotal_no_vat) }}</span>
+            </div>
+            <div class="flex justify-between font-bold border-t border-slate-200 pt-1">
+                <span>รวม</span>
+                <span class="font-mono">฿{{ "{:,.2f}".format(booking.total_price) }}</span>
+            </div>
+            <div class="flex justify-between text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5">
+                <span>มัดจำ 5% (พร้อมเพย์)</span>
+                <span class="font-mono">฿{{ "{:,.2f}".format(booking.deposit_amount) }}</span>
+            </div>
+            <div class="flex justify-between text-rose-800 font-bold bg-rose-50 px-2 py-0.5">
+                <span>คงค้างชำระวันงาน</span>
+                <span class="font-mono">฿{{ "{:,.2f}".format(remaining_balance) }}</span>
+            </div>
+        </div>
+
+        <div class="border-t border-dashed border-slate-300 my-2"></div>
+
+        <!-- รายละเอียดเครื่องและแคชเชียร์ -->
+        <div class="space-y-0.5 text-[11px] text-slate-600">
+            <div>เครื่อง 001</div>
+            <div class="flex justify-between">
+                <span>แคชเชียร์ 002 (ระบบอัตโนมัติ)</span>
+                <span>เวลา {{ booking.created_at[11:19] if booking.created_at else '12:00:00' }}</span>
+            </div>
+            <div class="text-[10px] text-slate-500 pt-1">
+                P= สินค้าราคาพิเศษ &nbsp; V= สินค้าคิดภาษี
+            </div>
+        </div>
+
+        <!-- ป้าย VAT INCLUDED -->
+        <div class="mt-4 pt-2 border-t-2 border-double border-slate-900 text-center">
+            <div class="text-slate-900 font-bold px-3 py-0.5 text-xs tracking-wider">
+                VAT INCLUDED
+            </div>
+            <div class="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                เอกสารนี้ได้จัดทำและส่งข้อมูลให้แก่กรมสรรพากรด้วยวิธีการทางอิเล็กทรอนิกส์<br>
+                (e-Tax Invoice &amp; e-Receipt)
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- JavaScript ควบคุมการสลับมุมมองเอกสารและการพิมพ์ -->
+<script>
+    let currentInvoiceMode = 'full'; // 'full' or 'abb'
+
+    function switchInvoiceMode(mode) {
+        currentInvoiceMode = mode;
+        const fullView = document.getElementById('fullInvoiceView');
+        const abbView = document.getElementById('abbInvoiceView');
+        const btnFull = document.getElementById('btnShowFull');
+        const btnAbb = document.getElementById('btnShowAbb');
+        const label = document.getElementById('currentModeLabel');
+
+        if (mode === 'abb') {
+            fullView.classList.add('hidden');
+            abbView.classList.remove('hidden');
+            btnAbb.classList.add('bg-white', 'text-slate-900', 'shadow-2xs', 'border', 'border-slate-200');
+            btnAbb.classList.remove('text-slate-600');
+            btnFull.classList.remove('bg-white', 'text-slate-900', 'shadow-2xs', 'border', 'border-slate-200');
+            btnFull.classList.add('text-slate-600');
+            label.textContent = 'ใบกำกับภาษีอย่างย่อ TAX INVOICE (ABB) (อ้างอิงตามประมวลรัษฎากร ม.86/6)';
+            document.body.classList.add('print-abb');
+        } else {
+            abbView.classList.add('hidden');
+            fullView.classList.remove('hidden');
+            btnFull.classList.add('bg-white', 'text-slate-900', 'shadow-2xs', 'border', 'border-slate-200');
+            btnFull.classList.remove('text-slate-600');
+            btnAbb.classList.remove('bg-white', 'text-slate-900', 'shadow-2xs', 'border', 'border-slate-200');
+            btnAbb.classList.add('text-slate-600');
+            label.textContent = 'ใบเสร็จรับเงิน/ใบกำกับภาษีเต็มรูป (อ้างอิงตาม ป.พ.พ. และประมวลรัษฎากร ม.86/4)';
+            document.body.classList.remove('print-abb');
+        }
+    }
+
+    function handlePrint() {
+        if (currentInvoiceMode === 'abb') {
+            document.body.classList.add('print-abb');
+        } else {
+            document.body.classList.remove('print-abb');
+        }
+        window.print();
+    }
+</script>
+{% endblock %}

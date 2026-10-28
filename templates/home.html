@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}หน้าหลัก | BKB EVENT BOOKING - บริการจัดงานแข่งขันบาสเกตบอลครบวงจร{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-12 sm:space-y-16">
+
+    <!-- 1. HIGH-IMPACT HERO BANNER (ภาพพื้นหลังสนามบาสเกตบอลในร่มพร้อม Dark Overlay) -->
+    <section class="relative rounded-2xl overflow-hidden border border-slate-300 shadow-lg min-h-[440px] sm:min-h-[480px] flex items-center">
+        <!-- ภาพพื้นหลัง -->
+        <div class="absolute inset-0 bg-cover bg-center banner-wiggle-effect"
+             style="background-image: url('/images/hero-bg.jpg');"
+             role="img" aria-label="สนามบาสเกตบอลในร่มมาตรฐาน">
+        </div>
+
+        <!-- Dark Overlay ไล่เฉดสีเพื่อให้อ่านตัวอักษรได้คมชัดสบายตา -->
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/85 to-slate-950/70"></div>
+
+        <!-- เนื้อหา Hero -->
+        <div class="relative z-10 w-full p-6 sm:p-10 lg:p-14 max-w-3xl">
+            <!-- Badge ระบุบริการ -->
+            <div class="inline-flex items-center space-x-2 bg-white/10 text-white backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-xs font-mono mb-4">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-semibold tracking-wider uppercase">KHON KAEN TOURNAMENT SERVICE</span>
+            </div>
+
+            <!-- หัวข้อหลักตัวหนา คมชัด -->
+            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight mb-4">
+                ระบบบริการจัดการงานแข่งขัน<br class="hidden sm:inline">และทัวร์นาเมนต์บาสเกตบอล
+            </h1>
+
+            <!-- คำอธิบายย่อย -->
+            <p class="text-slate-200 text-xs sm:text-sm lg:text-base leading-relaxed font-light mb-8 max-w-2xl">
+                บริการบริหารจัดการและจัดงานแข่งขันบาสเกตบอลมาตรฐาน FIBA ครบวงจรในจังหวัดขอนแก่น ทั้งสนามยิมเนเซียม มหาวิทยาลัยขอนแก่น และสนามมาตรฐานระดับจังหวัด เลือกระยะเวลา กำหนดวันแข่ง ชำระเงินมัดจำ 5% ผ่านพร้อมเพย์ และรับใบกำกับภาษีเต็มรูปทางอีเมลอัตโนมัติ
+            </p>
+
+            <!-- Call-to-Action Buttons (2 ปุ่มชัดเจน ไม่ซ้ำซ้อน) -->
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                <a href="/packages" 
+                   class="inline-flex items-center justify-center px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm rounded-lg shadow-md hover:shadow-sky-600/30 transition transform hover:-translate-y-0.5">
+                    <span>สำรวจแพ็กเกจ</span>
+                    <span class="ml-2 font-mono">→</span>
+                </a>
+                <a href="/schedule" 
+                   class="inline-flex items-center justify-center px-6 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm font-semibold text-xs sm:text-sm rounded-lg transition transform hover:-translate-y-0.5">
+                    <span>ตรวจสอบวันว่าง</span>
+                </a>
+            </div>
+
+            <!-- จุดเด่นบริการย่อ 4 รายการ -->
+            <div class="mt-8 pt-6 border-t border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-4 text-white text-xs font-mono">
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase">VENUE</span>
+                    <span class="font-bold">มาตรฐาน FIBA</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase">REFEREE</span>
+                    <span class="font-bold">กรรมการสมาคมฯ</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase">DEPOSIT</span>
+                    <span class="font-bold">มัดจำ 5% พร้อมเพย์</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase">DOCUMENT</span>
+                    <span class="font-bold">ใบกำกับภาษีอีเมล</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. BOOKING PROCESS (4 ขั้นตอนแนวนอน พร้อม Mini Icons กวาดตาเข้าใจใน 3 วินาที) -->
+    <section>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-300 pb-3 mb-6">
+            <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block font-mono">BOOKING PROCESS</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">ขั้นตอนการจองและจัดงานแข่งขัน (4 ขั้นตอน)</h2>
+            </div>
+            <span class="text-xs font-mono text-slate-500">จองสะดวกรวดเร็วใน 4 ขั้นตอน</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Step 01 -->
+            <div class="bg-white border border-slate-300 p-6 rounded-xl hover:border-sky-500 hover:shadow-md transition-all duration-200 group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl font-black font-mono text-slate-300 group-hover:text-sky-600 transition">01</span>
+                        <div class="w-11 h-11 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center">
+                            <!-- Icon: Tournament / Trophy -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-sky-600 transition mb-2">เลือกแพ็กเกจการแข่งขัน</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                        เลือกประเภทการแข่งขันที่ตรงกับสเกลงาน เช่น 5x5 ทัวร์นาเมนต์, สตรีทบาส 3x3, ลีกเยาวชน หรือกีฬาองค์กร
+                    </p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                    <span>สเกลงาน</span>
+                    <span class="font-bold text-slate-700">4 - 32 ทีม</span>
+                </div>
+            </div>
+
+            <!-- Step 02 -->
+            <div class="bg-white border border-slate-300 p-6 rounded-xl hover:border-sky-500 hover:shadow-md transition-all duration-200 group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl font-black font-mono text-slate-300 group-hover:text-sky-600 transition">02</span>
+                        <div class="w-11 h-11 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center">
+                            <!-- Icon: Calendar & Clock -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-sky-600 transition mb-2">ระบุวัน เวลา และสนาม</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                        เลือกสนามแข่งขันในขอนแก่น (ยิม มข., อบจ., เทศบาล) และตรวจสอบคิวว่างแบบเรียลไทม์
+                    </p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                    <span>ตรวจสอบสถานะ</span>
+                    <span class="font-bold text-slate-700">ปฏิทินเรียลไทม์</span>
+                </div>
+            </div>
+
+            <!-- Step 03 -->
+            <div class="bg-white border border-slate-300 p-6 rounded-xl hover:border-sky-500 hover:shadow-md transition-all duration-200 group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl font-black font-mono text-slate-300 group-hover:text-sky-600 transition">03</span>
+                        <div class="w-11 h-11 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+                            <!-- Icon: QR Code / Mobile Payment -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-sky-600 transition mb-2">ชำระเงินมัดจำ 5%</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                        สแกน QR Code พร้อมเพย์ 091-830-3564 ยอดตรงอัตโนมัติ และแนบสลิปเพื่อยืนยันคิวงาน
+                    </p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono">
+                    <span class="text-slate-500">พร้อมเพย์</span>
+                    <span class="font-bold text-emerald-700">091-830-3564</span>
+                </div>
+            </div>
+
+            <!-- Step 04 -->
+            <div class="bg-white border border-slate-300 p-6 rounded-xl hover:border-sky-500 hover:shadow-md transition-all duration-200 group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl font-black font-mono text-slate-300 group-hover:text-sky-600 transition">04</span>
+                        <div class="w-11 h-11 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center">
+                            <!-- Icon: Tax Invoice & Download -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-sky-600 transition mb-2">ดาวน์โหลดใบเสร็จ / ใบกำกับภาษี</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                        ระบบออกใบเสร็จรับเงินและใบกำกับภาษีเต็มรูป สามารถตรวจสอบและดาวน์โหลดเป็นไฟล์ PDF ได้ทันที
+                    </p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                    <span>เอกสาร</span>
+                    <span class="font-bold text-slate-700">ใบกำกับภาษีเต็มรูป</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. FEATURED TOURNAMENT FORMATS (VISUAL GRID - รูปแบบการแข่งขันพร้อมรูปภาพโปรโมชั่น) -->
+    <section>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-300 pb-3 mb-6">
+            <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block font-mono">TOURNAMENT FORMATS</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">รูปแบบการแข่งขันที่เปิดให้บริการ</h2>
+            </div>
+            <a href="/packages" class="text-xs sm:text-sm font-bold text-sky-600 hover:text-sky-700 flex items-center space-x-1">
+                <span>ดูรายละเอียดและราคาแพ็กเกจทั้งหมด</span>
+                <span class="font-mono">→</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Format 1: 5x5 Full Court -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <a href="/packages" class="block h-48 overflow-hidden relative bg-slate-100 cursor-pointer">
+                        <img src="/images/tournament-5v5.jpg" 
+                             alt="ทัวร์นาเมนต์เต็มสนาม 5x5"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/images/packages/friendly.jpg';">
+                        <div class="absolute top-3 left-3 bg-slate-900/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            5x5 FULL COURT
+                        </div>
+                    </a>
+                    <div class="p-5">
+                        <h3 class="text-base font-bold text-slate-900 mb-1.5 group-hover:text-sky-600 transition">
+                            <a href="/packages" class="hover:text-sky-600 transition">ทัวร์นาเมนต์เต็มสนาม</a>
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            การแข่งขัน 5 คน กติกาสากล FIBA กรรมการสมาคมฯ 2 ท่าน พร้อมสกอร์บอร์ดดิจิทัล สำหรับกระชับมิตรและชิงแชมป์
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ระยะเวลา:</span>
+                    <span class="font-bold text-slate-700">ครึ่งวัน - 2 วัน</span>
+                </div>
+            </div>
+
+            <!-- Format 2: FIBA 3x3 Streetball -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <a href="/packages" class="block h-48 overflow-hidden relative bg-slate-100 cursor-pointer">
+                        <img src="/images/tournament-3x3.jpg" 
+                             alt="สตรีทบาสเกตบอล 3x3"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/images/packages/streetball.jpg';">
+                        <div class="absolute top-3 left-3 bg-amber-600/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            FIBA 3x3 RULES
+                        </div>
+                    </a>
+                    <div class="p-5">
+                        <h3 class="text-base font-bold text-slate-900 mb-1.5 group-hover:text-sky-600 transition">
+                            <a href="/packages" class="hover:text-sky-600 transition">สตรีทบาสเกตบอล 3x3</a>
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            การแข่งขัน 3 คน กติกาสากล FIBA 3x3 ช็อตคล็อก 12 วิ รองรับ 16 - 32 ทีม แข่งขันจบไว พร้อมระบบเสียงและดีเจ
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ระยะเวลา:</span>
+                    <span class="font-bold text-slate-700">เต็มวัน (8 ชม.)</span>
+                </div>
+            </div>
+
+            <!-- Format 3: Youth & School League -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <a href="/packages" class="block h-48 overflow-hidden relative bg-slate-100 cursor-pointer">
+                        <img src="/images/tournament-youth.jpg" 
+                             alt="ลีกเยาวชนและสถานศึกษา"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/images/packages/youth.jpg';">
+                        <div class="absolute top-3 left-3 bg-emerald-600/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            YOUTH &amp; SCHOOL
+                        </div>
+                    </a>
+                    <div class="p-5">
+                        <h3 class="text-base font-bold text-slate-900 mb-1.5 group-hover:text-sky-600 transition">
+                            <a href="/packages" class="hover:text-sky-600 transition">ลีกเยาวชนและสถานศึกษา</a>
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            ทัวร์นาเมนต์สำหรับโรงเรียนและอะคาเดมี บันทึกสถิติ Box Score รายบุคคล พร้อมถ่ายทอดสด Live Streaming Full HD
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ระยะเวลา:</span>
+                    <span class="font-bold text-slate-700">เต็มวัน (8 ชม.)</span>
+                </div>
+            </div>
+
+            <!-- Format 4: Corporate & Company Cup -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <a href="/packages" class="block h-48 overflow-hidden relative bg-slate-100 cursor-pointer">
+                        <img src="/images/tournament-corp.jpg" 
+                             alt="กีฬาเชื่อมสัมพันธ์องค์กร"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/images/packages/corporate.jpg';">
+                        <div class="absolute top-3 left-3 bg-sky-700/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            CORPORATE CUP
+                        </div>
+                    </a>
+                    <div class="p-5">
+                        <h3 class="text-base font-bold text-slate-900 mb-1.5 group-hover:text-sky-600 transition">
+                            <a href="/packages" class="hover:text-sky-600 transition">กีฬาเชื่อมสัมพันธ์องค์กร</a>
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            ทัวร์นาเมนต์สำหรับบริษัทและหน่วยงาน พร้อมทีมงานต้อนรับ โต๊ะลงทะเบียน ถ้วยรางวัลเกียรติยศ และใบกำกับภาษีครบถ้วน
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ระยะเวลา:</span>
+                    <span class="font-bold text-slate-700">1 - 2 วัน</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- แถบนำทางเดียวไปหน้าแคตตาล็อกแพ็กเกจฉบับเต็ม -->
+        <div class="mt-6 p-6 bg-slate-50 border border-slate-300 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <span class="text-xs font-mono font-bold text-slate-500 uppercase block mb-1">READY TO CHOOSE YOUR PACKAGE?</span>
+                <h4 class="text-base font-bold text-slate-900">ดูรายละเอียด เปรียบเทียบสเกลงาน และอัตราค่าบริการทั้งหมด</h4>
+                <p class="text-xs text-slate-600 mt-0.5">เลือกดูแพ็กเกจฉบับเต็ม พร้อมค้นหา ตัวกรองหมวดหมู่ และส่งคำขอจองคิวงานในหน้าแพ็กเกจ</p>
+            </div>
+            <a href="/packages" class="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm rounded-lg transition whitespace-nowrap shadow-sm hover:shadow-md">
+                เปิดดูหน้าแพ็กเกจจัดงานทั้งหมด →
+            </a>
+        </div>
+    </section>
+
+    <!-- 4. FEATURED VENUES (VISUAL GRID - สนามแข่งขันในจังหวัดขอนแก่นที่รองรับการจอง) -->
+    <section>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-300 pb-3 mb-6">
+            <div>
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block font-mono">KHON KAEN VENUES</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">สนามแข่งขันในจังหวัดขอนแก่นที่รองรับการจอง</h2>
+            </div>
+            <a href="/standards" class="text-xs sm:text-sm font-bold text-sky-600 hover:text-sky-700 flex items-center space-x-1">
+                <span>ดูมาตรฐานและรายละเอียดสนามฉบับเต็ม</span>
+                <span class="font-mono">→</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Venue 1: ยิม 1 มข. -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <img src="/images/venue-1.jpg" 
+                             alt="ยิมเนเซียม 1 มหาวิทยาลัยขอนแก่น"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/banners/banner2.jpg';">
+                        <div class="absolute top-3 left-3 bg-sky-700/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            มข. • ติดแอร์
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                            อัฒจันทร์ 1,500 ที่นั่ง
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-[11px] font-mono text-slate-500 mb-1">ศูนย์กีฬา มหาวิทยาลัยขอนแก่น</div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition">
+                            ยิมเนเซียม 1 มหาวิทยาลัยขอนแก่น
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            พื้นไม้ปาร์เก้แข่งขันระดับสากล ติดตั้งระบบปรับอากาศเย็นสบาย อัฒจันทร์รองรับผู้ชมขนาดใหญ่ พร้อมห้องพักนักกีฬาและผู้ตัดสิน
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ประเภทสนาม:</span>
+                    <span class="font-bold text-slate-700">พื้นไม้ปาร์เก้สากล</span>
+                </div>
+            </div>
+
+            <!-- Venue 2: อาคารพลศึกษา 2 มข. -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <img src="/images/venue-2.jpg" 
+                             alt="อาคารพลศึกษา 2 มหาวิทยาลัยขอนแก่น"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/banners/banner3.jpg';">
+                        <div class="absolute top-3 left-3 bg-sky-700/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            มข. • คอร์ทคู่
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                            อัฒจันทร์ 500 ที่นั่ง
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-[11px] font-mono text-slate-500 mb-1">ศูนย์กีฬา มหาวิทยาลัยขอนแก่น</div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition">
+                            อาคารพลศึกษา 2 มหาวิทยาลัยขอนแก่น
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            สนามพื้นยางสังเคราะห์มาตรฐาน FIBA รองรับการแบ่งสนามซ้อมและแข่งขัน 2 คอร์ทคู่ขนาน ระบบเสียงรอบทิศทาง
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ประเภทสนาม:</span>
+                    <span class="font-bold text-slate-700">พื้นยางสังเคราะห์ FIBA</span>
+                </div>
+            </div>
+
+            <!-- Venue 3: ยิมเนเซียม 600 ที่นั่ง มข. -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <img src="/images/venue-3.jpg" 
+                             alt="โรงยิมเนเซียม 600 ที่นั่ง มหาวิทยาลัยขอนแก่น"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/banners/banner4.jpg';">
+                        <div class="absolute top-3 left-3 bg-sky-700/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            มข. • ยิมในร่ม
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                            อัฒจันทร์ 600 ที่นั่ง
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-[11px] font-mono text-slate-500 mb-1">ศูนย์กีฬา มหาวิทยาลัยขอนแก่น</div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition">
+                            โรงยิมเนเซียม 600 ที่นั่ง มข.
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            สนามในร่มบรรยากาศแข่งขันมาตรฐาน แสงสว่างสมบูรณ์แบบ อัฒจันทร์สองฝั่ง เหมาะสำหรับทัวร์นาเมนต์กระชับมิตรและลีกเยาวชน
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ประเภทสนาม:</span>
+                    <span class="font-bold text-slate-700">ในร่ม / พื้นไม้คอร์ทคู่</span>
+                </div>
+            </div>
+
+            <!-- Venue 4: สนามกีฬา อบจ. ขอนแก่น -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <img src="/images/venue-4.jpg" 
+                             alt="สนามกีฬา อบจ. ขอนแก่น"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/banners/banner5.jpg';">
+                        <div class="absolute top-3 left-3 bg-emerald-700/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            อบจ. ขอนแก่น
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                            ไฟส่องสว่างกลางคืน
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-[11px] font-mono text-slate-500 mb-1">ถนนเหล่านาดี เมืองขอนแก่น</div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition">
+                            สนามกีฬา อบจ. ขอนแก่น
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            สนามแข่งขันมาตรฐานระดับจังหวัด พร้อมไฟส่องสว่างระดับแข่งขันกลางคืน อัฒจันทร์รองรับผู้ชมรอบทิศทาง และที่จอดรถกว้างขวาง
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ประเภทสนาม:</span>
+                    <span class="font-bold text-slate-700">มาตรฐานระดับจังหวัด</span>
+                </div>
+            </div>
+
+            <!-- Venue 5: โรงยิมเนเซียมเทศบาลนครขอนแก่น -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <img src="/images/venue-5.jpg" 
+                             alt="โรงยิมเนเซียมเทศบาลนครขอนแก่น"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/images/catalogs/catalog1.jpg';">
+                        <div class="absolute top-3 left-3 bg-indigo-700/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            เทศบาลนครขอนแก่น
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                            ใจกลางเมือง
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-[11px] font-mono text-slate-500 mb-1">ถนนกลางเมือง เมืองขอนแก่น</div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition">
+                            โรงยิมเนเซียมเทศบาลนครขอนแก่น
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            สนามในร่มใจกลางเมืองขอนแก่น การเดินทางสะดวกสบาย ใกล้ศูนย์การค้าและโรงแรม เหมาะสำหรับทัวร์นาเมนต์กระชับมิตรและลีกเยาวชน
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ประเภทสนาม:</span>
+                    <span class="font-bold text-slate-700">ในร่มใจกลางเมือง</span>
+                </div>
+            </div>
+
+            <!-- Venue 6: สวนสาธารณะรัชดาภิเษก 3x3 -->
+            <div class="bg-white border border-slate-300 rounded-xl overflow-hidden hover:border-slate-800 hover:shadow-lg transition duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <img src="/images/venue-6.jpg" 
+                             alt="สนามบาสฯ สวนสาธารณะรัชดาภิเษก"
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-500"
+                             onerror="this.src='/static/images/catalogs/catalog4.jpg';">
+                        <div class="absolute top-3 left-3 bg-amber-600/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                            3x3 OPEN AIR
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                            ริมบึงแก่นนคร
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-[11px] font-mono text-slate-500 mb-1">ริมบึงแก่นนคร เมืองขอนแก่น</div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2 group-hover:text-sky-600 transition">
+                            สนามบาสฯ สวนสาธารณะรัชดาภิเษก
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                            สนามบาสเกตบอลกลางแจ้งมาตรฐาน สำหรับการแข่งขันสตรีทบาส 3x3 บรรยากาศเปิดโล่งริมบึงแก่นนคร รองรับผู้ชมรอบสนาม
+                        </p>
+                    </div>
+                </div>
+                <div class="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                    <span>ประเภทสนาม:</span>
+                    <span class="font-bold text-slate-700">กลางแจ้งสตรีทบาส 3x3</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. OUR STANDARDS & GUARANTEE (มาตรฐานระดับสากล 3 เสาหลัก) -->
+    <section class="bg-white border border-slate-300 rounded-2xl p-6 sm:p-10 shadow-sm">
+        <div class="border-b border-slate-200 pb-4 mb-8">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block font-mono">OUR STANDARDS</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">มาตรฐานการบริการจัดการแข่งขัน</h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">บริการทุกขั้นตอนดำเนินการด้วยทีมงานมืออาชีพตามระเบียบและมาตรฐานสากล</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-400 transition">
+                <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-2">กรรมการและโต๊ะเทคนิคสมาคมฯ</h3>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    ผู้ตัดสินที่มีใบรับรองจากสมาคมกีฬาบาสเกตบอลแห่งประเทศไทย ควบคุมกติกาตามมาตรฐานสากล พร้อมโต๊ะเทคนิคจับเวลา 24/12 วินาที
+                </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-400 transition">
+                <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-2">ถ่ายทอดสด &amp; สถิติ Box Score</h3>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    ระบบ Live Streaming Full HD พร้อมทีมกราฟิกสกอร์บอร์ดสด และการบันทึกสถิตินักกีฬารายบุคคลเพื่อการพัฒนาทักษะอย่างเป็นรูปธรรม
+                </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-400 transition">
+                <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-2">ใบกำกับภาษี &amp; เอกสารทางราชการ</h3>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    ออกใบเสร็จรับเงินและใบกำกับภาษีเต็มรูปอัตโนมัติ ถูกต้องตามระเบียบราชการ สามารถนำไปเบิกจ่ายในนามบริษัท โรงเรียน หรือสมาคมได้ทันที
+                </p>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

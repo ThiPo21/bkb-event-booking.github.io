@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ระบบอนุมัติการจอง &amp; รายงานผลสัมฤทธิ์ (Admin Console) | BKB EVENT BOOKING</title>
+    <!-- Favicon โลโก้แบรนด์ -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <!-- Google Fonts: Prompt & Sarabun (ฟอนต์มาตรฐาน อ่านง่าย ตัวเลขอ่านสบายตา) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for Bar Charts & Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'Sarabun', 'sans-serif'],
+                        mono: ['Prompt', 'Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#F0F9FF',
+                            100: '#E0F2FE',
+                            500: '#0284C7',
+                            600: '#0369A1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Prompt', 'Sarabun', sans-serif;
+            background-color: #F8FAFC;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .admin-view {
+            display: none;
+        }
+        .admin-view.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-800 antialiased selection:bg-slate-900 selection:text-white">
+
+    <!-- ================= NAVBAR (สไตล์ CIPHER: พื้นขาว คลีน มินิมอล เมนูข้อความเรียบหรู และปุ่มดำโค้งมน) ================= -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- ฝั่งซ้าย: โลโก้แบรนด์ + เมนูข้อความแนวนอนชิดกันแบบ CIPHER -->
+                <div class="flex items-center space-x-6 lg:space-x-8 min-w-0">
+                    <a href="/admin/bookings?view=dashboard" onclick="switchAdminView('dashboard', event)" class="flex items-center space-x-2.5 group flex-shrink-0">
+                        <span class="w-8 h-8 rounded-lg border border-slate-200 bg-white p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-slate-400 transition">
+                            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="w-full h-full object-contain">
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight uppercase">
+                                BKB EVENT
+                            </span>
+                            <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                แอดมิน
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- เมนูข้อความแนวนอนแบบคลีน ไม่ตีกรอบสี่เหลี่ยม (Clean Text Links like CIPHER) -->
+                    <nav class="hidden md:flex items-center space-x-5 lg:space-x-7 text-sm">
+                        <a href="/admin/bookings?view=dashboard" onclick="switchAdminView('dashboard', event)" id="nav-item-dashboard" 
+                           class="admin-nav-btn {% if active_view == 'dashboard' or not active_view %}text-slate-900 font-semibold border-b-2 border-slate-900{% else %}text-slate-500 hover:text-slate-900 font-medium border-b-2 border-transparent{% endif %} pb-1 transition">
+                            รายงานสถิติ
+                        </a>
+                        <a href="/admin/bookings?view=workflow" onclick="switchAdminView('workflow', event)" id="nav-item-workflow" 
+                           class="admin-nav-btn {% if active_view == 'workflow' %}text-slate-900 font-semibold border-b-2 border-slate-900{% else %}text-slate-500 hover:text-slate-900 font-medium border-b-2 border-transparent{% endif %} pb-1 transition">
+                            ลำดับปฏิบัติงาน
+                        </a>
+                        <a href="/admin/bookings?view=users" onclick="switchAdminView('users', event)" id="nav-item-users" 
+                           class="admin-nav-btn {% if active_view == 'users' %}text-slate-900 font-semibold border-b-2 border-slate-900{% else %}text-slate-500 hover:text-slate-900 font-medium border-b-2 border-transparent{% endif %} pb-1 transition">
+                            จัดการสมาชิก
+                        </a>
+                        <a href="/admin/bookings?view=database" onclick="switchAdminView('database', event)" id="nav-item-database" 
+                           class="admin-nav-btn {% if active_view == 'database' %}text-slate-900 font-semibold border-b-2 border-slate-900{% else %}text-slate-500 hover:text-slate-900 font-medium border-b-2 border-transparent{% endif %} pb-1 transition">
+                            สำรองฐานข้อมูล
+                        </a>
+                        <span class="h-4 w-px bg-slate-200"></span>
+                        <a href="/schedule" target="_blank" class="text-slate-400 hover:text-slate-700 font-medium transition flex items-center space-x-1 pb-1">
+                            <span>เช็กคิวว่าง</span>
+                            <span class="text-xs">↗</span>
+                        </a>
+                        <a href="/home" target="_blank" class="text-slate-400 hover:text-slate-700 font-medium transition flex items-center space-x-1 pb-1">
+                            <span>หน้าเว็บหลัก</span>
+                            <span class="text-xs">↗</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0">
+                    {% if member_user %}
+                        <a href="/home" target="_blank" class="hidden md:inline-flex items-center space-x-1.5 text-xs font-medium text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded transition" title="เปิดแท็บสมาชิก">
+                            <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                            <span>แท็บสมาชิก (@{{ member_user.username }})</span>
+                            <span class="text-[10px]">↗</span>
+                        </a>
+                    {% endif %}
+                    <span class="text-xs sm:text-sm font-medium text-slate-700 hidden sm:inline-block">
+                        {{ admin_user.username if admin_user else (current_user.username if current_user else 'admin') }}
+                    </span>
+                    <a href="/admin/logout" class="bg-black hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition shadow-xs">
+                        ออกจากระบบ
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- แถบเมนูย่อยสำหรับหน้าจอมือถือ (Mobile Admin Sub-Navigation) -->
+    <div class="md:hidden bg-white border-b border-slate-200 px-4 py-2.5 overflow-x-auto">
+        <div class="flex items-center space-x-2 text-xs min-w-max">
+            <button type="button" onclick="switchAdminView('dashboard')" id="mob-nav-dashboard"
+                    class="mob-nav-btn px-3 py-1.5 rounded-lg font-medium transition {% if active_view == 'dashboard' or not active_view %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                รายงานสถิติ
+            </button>
+            <button type="button" onclick="switchAdminView('workflow')" id="mob-nav-workflow"
+                    class="mob-nav-btn px-3 py-1.5 rounded-lg font-medium transition {% if active_view == 'workflow' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                ลำดับปฏิบัติงาน
+            </button>
+            <button type="button" onclick="switchAdminView('users')" id="mob-nav-users"
+                    class="mob-nav-btn px-3 py-1.5 rounded-lg font-medium transition {% if active_view == 'users' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                จัดการสมาชิก
+            </button>
+            <button type="button" onclick="switchAdminView('database')" id="mob-nav-database"
+                    class="mob-nav-btn px-3 py-1.5 rounded-lg font-medium transition {% if active_view == 'database' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                สำรองฐานข้อมูล
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= 2. พื้นที่ทำงานหลัก (MAIN WORKSPACE) ================= -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+        <!-- Flash Messages (แจ้งเตือนแบบคลีน สบายตา) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="p-3.5 text-xs sm:text-sm font-medium rounded-lg border flex items-center justify-between
+                                    {% if category == 'error' %}bg-rose-50 border-rose-200 text-rose-800
+                                    {% elif category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800
+                                    {% else %}bg-sky-50 border-sky-200 text-sky-800{% endif %}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- ส่วนหัวหน้าแบบเรียบง่ายและเป็นระเบียบ (Single Clean Header - Tailwind CSS / Shadcn UI Standards) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5 mb-6">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900" id="view-title">
+                    {% if active_view == 'workflow' %}ลำดับปฏิบัติงานและการตรวจสอบคิว
+                    {% elif active_view == 'users' %}จัดการบัญชีสมาชิกที่ลงทะเบียน
+                    {% elif active_view == 'database' %}ระบบสำรองและกู้คืนฐานข้อมูล
+                    {% else %}สรุปผลสัมฤทธิ์และสถิติภาพรวม{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1" id="view-desc">
+                    {% if active_view == 'workflow' %}ตรวจสอบคำขอจองคิวงาน อนุมัติคิว และจัดการสถานะตามลำดับปฏิบัติงาน
+                    {% elif active_view == 'users' %}ตรวจสอบรายชื่อสมาชิก สถิติการจอง และสิทธิ์การใช้งาน
+                    {% elif active_view == 'database' %}จัดการไฟล์สำรองข้อมูลอัตโนมัติ และกู้คืนข้อมูลระบบ (Auto-Recovery)
+                    {% else %}ติดตามสถิติการดำเนินงาน อัตราความสำเร็จ และสถิติเชิงลึก{% endif %}
+                </p>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <a href="/schedule" target="_blank" class="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition">
+                    <span>เปิดปฏิทินตรวจสอบวันว่าง</span>
+                    <span class="text-xs">↗</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 1: แดชบอร์ดสรุปผลสัมฤทธิ์ (EXECUTIVE DASHBOARD) ================= -->
+        <div id="view-dashboard" class="admin-view space-y-6 {% if active_view == 'dashboard' or not active_view %}active{% endif %}">
+        <section id="dashboard-section" class="space-y-6">
+            
+            <!-- 1. การ์ดตัวเลขสถิติหลัก 4 ใบ (Metric Cards - Shadcn UI Standards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- การ์ดที่ 1: อัตราความสำเร็จการจอง -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium text-slate-500">อัตราความสำเร็จ (Success Rate)</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                {{ dashboard.confirmed_count }}/{{ dashboard.total_bookings }} คิว
+                            </span>
+                        </div>
+                        <div class="my-3">
+                            <div class="text-3xl font-bold tracking-tight text-slate-900 font-sans">
+                                {{ dashboard.success_rate }}<span class="text-lg font-medium text-slate-500 font-sans">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 space-y-1.5">
+                        <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-sky-600 h-full rounded-full transition-all duration-300" style="width: {{ dashboard.success_rate }}%;"></div>
+                        </div>
+                        <div class="text-xs text-slate-400 flex items-center justify-between">
+                            <span>ความคืบหน้าการตรวจงาน:</span>
+                            <span class="font-medium text-slate-600 font-sans">{{ dashboard.inspection_rate }}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- การ์ดที่ 2: ยอดเงินมัดจำจริงที่จัดเก็บแล้ว -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium text-slate-500">ยอดเงินมัดจำ 5% ที่จัดเก็บแล้ว</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                พร้อมเพย์
+                            </span>
+                        </div>
+                        <div class="my-3">
+                            <div class="text-3xl font-bold tracking-tight text-slate-900 font-sans">
+                                ฿{{ "{:,.2f}".format(dashboard.total_deposit_collected) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <p class="text-xs text-slate-500 truncate">
+                            จากคิวที่อนุมัติแล้ว <span class="font-medium text-slate-700 font-sans">{{ dashboard.confirmed_count }}</span> รายการ
+                        </p>
+                    </div>
+                </div>
+
+                <!-- การ์ดที่ 3: มูลค่างานรวมที่ยืนยันแล้ว -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium text-slate-500">มูลค่างานรวมที่ยืนยันแล้ว</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-200">
+                                อนุมัติแล้ว
+                            </span>
+                        </div>
+                        <div class="my-3">
+                            <div class="text-3xl font-bold tracking-tight text-slate-900 font-sans">
+                                ฿{{ "{:,}".format(dashboard.total_confirmed_revenue) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <p class="text-xs text-slate-500 truncate">
+                            มูลค่างานรวมที่ปิดการจองสำเร็จ
+                        </p>
+                    </div>
+                </div>
+
+                <!-- การ์ดที่ 4: คิวงานที่รอการตรวจสอบ -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium text-slate-500">คิวงานที่รอการตรวจสอบ</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                รออนุมัติ
+                            </span>
+                        </div>
+                        <div class="my-3">
+                            <div class="text-3xl font-bold tracking-tight text-slate-900 font-sans">
+                                {{ dashboard.pending_count }} <span class="text-lg font-medium text-slate-500 font-sans">คิว</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <p class="text-xs text-slate-500 truncate">
+                            ยอดมัดจำรอตรวจ: <span class="font-medium text-slate-700 font-sans">฿{{ "{:,.2f}".format(dashboard.total_pending_deposit) }}</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 2. ส่วนวิเคราะห์สถิติภาพรวมและกราฟแท่ง (Visual Analytics & Bar Charts) -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold tracking-tight text-slate-900">
+                            วิเคราะห์สถิติเชิงลึกด้วยกราฟแท่ง (Bar Charts Analytics)
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            แสดงสัดส่วนคิวงาน ความต้องการแพ็กเกจ และการใช้งานสนามแข่งขันในขอนแก่น
+                        </p>
+                    </div>
+
+                    <!-- ปุ่มสลับมุมมอง กราฟแท่ง / รายการสรุป -->
+                    <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200 self-start sm:self-auto">
+                        <button type="button" id="btnToggleChart" onclick="toggleAnalyticsView('chart')"
+                                class="px-3 py-1.5 text-xs font-semibold rounded-md bg-white text-slate-900 shadow-2xs transition cursor-pointer">
+                            มุมมองกราฟแท่ง
+                        </button>
+                        <button type="button" id="btnToggleList" onclick="toggleAnalyticsView('list')"
+                                class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer">
+                            มุมมองรายการ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2.1 มุมมองกราฟแท่ง (Bar Charts Grid - 4 คอร์เปอเรตการ์ด) -->
+                <div id="analytics-chart-view" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- กราฟแท่งที่ 1: สถานะคิวงานทั้งหมด -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        สถานะคิวงานและการดำเนินงาน
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">เปรียบเทียบสัดส่วนตามสถานะการจอง</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-200 font-sans">
+                                    {{ dashboard.total_bookings }} คิวงาน
+                                </span>
+                            </div>
+                            <div class="relative h-64 sm:h-72 w-full">
+                                <canvas id="chartStatus"></canvas>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <span>อัตราการตรวจงานสำเร็จ: <strong class="text-slate-700 font-sans">{{ dashboard.success_rate }}%</strong></span>
+                            <span>รอตรวจ: <strong class="text-amber-600 font-sans">{{ dashboard.pending_count }}</strong> คิว</span>
+                        </div>
+                    </div>
+
+                    <!-- กราฟแท่งที่ 2: ความนิยมแพ็กเกจการแข่งขัน -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        ความนิยมแพ็กเกจการแข่งขัน
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">คำขอจองทั้งหมดเทียบกับจำนวนที่อนุมัติสำเร็จ</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 font-sans">
+                                    อนุมัติ {{ dashboard.confirmed_count }} คิว
+                                </span>
+                            </div>
+                            {% if dashboard.package_stats %}
+                                <div class="relative h-64 sm:h-72 w-full">
+                                    <canvas id="chartPackage"></canvas>
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center justify-center h-64 sm:h-72 py-8 px-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2.5">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">ยังไม่มีข้อมูลแพ็กเกจสำหรับการสร้างกราฟ</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">กราฟจะแสดงเมื่อมีคำขอจองแพ็กเกจเข้ามา</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <span>มูลค่าที่ปิดการจองได้: <strong class="text-slate-700 font-sans">฿{{ "{:,}".format(dashboard.total_confirmed_revenue) }}</strong></span>
+                            <span>{{ dashboard.package_stats|length }} รูปแบบงาน</span>
+                        </div>
+                    </div>
+
+                    <!-- กราฟแท่งที่ 3: สนามแข่งขันในขอนแก่นที่ถูกเลือก -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        สนามแข่งขันที่ถูกเลือกใช้งาน
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">ความถี่การใช้งานสนามในจังหวัดขอนแก่น</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 font-sans">
+                                    {{ dashboard.venue_stats|length }} สนาม
+                                </span>
+                            </div>
+                            {% if dashboard.venue_stats %}
+                                <div class="relative h-64 sm:h-72 w-full">
+                                    <canvas id="chartVenue"></canvas>
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center justify-center h-64 sm:h-72 py-8 px-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2.5">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">ยังไม่มีข้อมูลสนามแข่งขันสำหรับการสร้างกราฟ</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">กราฟจะแสดงเมื่อมีการเลือกสนามแข่งขันในขอนแก่น</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <span>มาตรฐานสนาม: FIBA มาตรฐานระดับประเทศ</span>
+                            <span>ขอนแก่น</span>
+                        </div>
+                    </div>
+
+                    <!-- กราฟแท่งที่ 4: จังหวัดของผู้จัดการแข่งขัน -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        จังหวัดของผู้จัดการแข่งขัน
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">ภูมิลำเนาของสมาชิกผู้จัดการแข่งขัน</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 font-sans">
+                                    {{ dashboard.province_stats|length }} จังหวัด
+                                </span>
+                            </div>
+                            {% if dashboard.province_stats %}
+                                <div class="relative h-64 sm:h-72 w-full">
+                                    <canvas id="chartProvince"></canvas>
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center justify-center h-64 sm:h-72 py-8 px-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2.5">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 012 2v2.945M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">ยังไม่มีข้อมูลจังหวัดสำหรับการสร้างกราฟ</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">กราฟจะแสดงเมื่อสมาชิกส่งคำขอจากแต่ละจังหวัด</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <span>ผู้จัดส่วนใหญ่มาจากภาคตะวันออกเฉียงเหนือ</span>
+                            <span>ครอบคลุมทั่วประเทศ</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 2.2 มุมมองรายการตารางสรุป (Detailed List View) -->
+                <div id="analytics-list-view" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- สถิติแพ็กเกจยอดนิยม -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        แพ็กเกจยอดนิยม
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">จัดอันดับตามจำนวนคำขอจอง</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                    คำขอ / อนุมัติ
+                                </span>
+                            </div>
+                            {% if dashboard.package_stats %}
+                                <div class="space-y-3.5">
+                                    {% for pkg_name, p_data in dashboard.package_stats %}
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center justify-between text-xs">
+                                                <span class="font-medium text-slate-800 truncate pr-2">{{ pkg_name }}</span>
+                                                <span class="text-slate-500 font-sans whitespace-nowrap">{{ p_data.count }} คิว <span class="text-slate-400 text-[11px]">(อนุมัติ {{ p_data.confirmed }})</span></span>
+                                            </div>
+                                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                                <div class="bg-sky-600 h-full rounded-full transition-all duration-300" style="width: {{ (p_data.count / dashboard.total_bookings * 100) if dashboard.total_bookings > 0 else 0 }}%;"></div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center justify-center py-8 px-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2.5">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">ยังไม่มีข้อมูลแพ็กเกจ</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">ข้อมูลจะแสดงเมื่อมีการส่งคำขอจองแพ็กเกจเข้ามา</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- สถิติสนามแข่งขันในขอนแก่น -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        สนามแข่งขันที่ถูกเลือก
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">สถิติสนามในจังหวัดขอนแก่น</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                    ความถี่ (ครั้ง)
+                                </span>
+                            </div>
+                            {% if dashboard.venue_stats %}
+                                <div class="space-y-3.5">
+                                    {% for venue_name, v_data in dashboard.venue_stats %}
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center justify-between text-xs">
+                                                <span class="font-medium text-slate-800 truncate pr-2">{{ venue_name }}</span>
+                                                <span class="text-slate-500 font-sans whitespace-nowrap">{{ v_data.count }} ครั้ง</span>
+                                            </div>
+                                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                                <div class="bg-sky-600 h-full rounded-full transition-all duration-300" style="width: {{ (v_data.count / dashboard.total_bookings * 100) if dashboard.total_bookings > 0 else 0 }}%;"></div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center justify-center py-8 px-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2.5">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">ยังไม่มีข้อมูลสนามแข่งขัน</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">ข้อมูลจะแสดงเมื่อมีการเลือกสนามแข่งขันในขอนแก่น</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- สถิติจังหวัดของผู้จอง -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-900 tracking-tight">
+                                        จังหวัดของผู้จอง
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">ภูมิลำเนาของผู้จัดการแข่งขัน</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                    จำนวนคิว
+                                </span>
+                            </div>
+                            {% if dashboard.province_stats %}
+                                <div class="space-y-3.5">
+                                    {% for prov_name, count in dashboard.province_stats[:5] %}
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center justify-between text-xs">
+                                                <span class="font-medium text-slate-800">{{ prov_name }}</span>
+                                                <span class="text-slate-500 font-sans">{{ count }} คิว</span>
+                                            </div>
+                                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                                <div class="bg-sky-600 h-full rounded-full transition-all duration-300" style="width: {{ (count / dashboard.total_bookings * 100) if dashboard.total_bookings > 0 else 0 }}%;"></div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center justify-center py-8 px-4 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2.5">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 012 2v2.945M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-500">ยังไม่มีข้อมูลจังหวัด</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">ข้อมูลจะแสดงเมื่อสมาชิกส่งคำขอจากแต่ละจังหวัด</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- แถบทางลัดเข้าสู่ลำดับปฏิบัติงาน -->
+            <div class="p-5 bg-white border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 text-slate-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900">
+                            พร้อมตรวจสอบและจัดการคิวงานต่อหรือไม่?
+                        </h4>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            มีคำขอที่รอการตรวจสอบ {{ dashboard.pending_count }} รายการในขณะนี้
+                        </p>
+                    </div>
+                </div>
+                <button type="button" onclick="switchAdminView('workflow')" 
+                        class="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs sm:text-sm font-medium transition shadow-xs cursor-pointer flex-shrink-0 self-start sm:self-auto">
+                    <span>ไปยังลำดับปฏิบัติงาน</span>
+                    <span class="text-xs font-mono">&rarr;</span>
+                </button>
+            </div>
+        </section>
+        </div>
+
+        <!-- ================= VIEW 2: ระบบจัดการคิวงานแยกตามลำดับปฏิบัติงาน (OPERATIONAL WORKFLOW STAGES) ================= -->
+        <div id="view-workflow" class="admin-view space-y-6 {% if active_view == 'workflow' %}active{% endif %}">
+        <section id="workflow-section" class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+            
+            <!-- แถบเลือกลำดับปฏิบัติงาน (Clean Segmented Tab Controls) -->
+            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-sm sm:text-base font-bold text-slate-900">
+                        รายการคิวงานแยกตามลำดับปฏิบัติงาน
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        รายการที่ตรวจสอบแล้วจะล็อคปุ่มอนุมัติ/ปฏิเสธทันที เพื่อป้องกันการตัดสินใจซ้ำ
+                    </p>
+                </div>
+
+                <!-- แถบปุ่มแท็บสลับข้อมูลแบบเรียบง่าย -->
+                <div class="bg-slate-200/70 p-1 rounded-xl inline-flex flex-wrap gap-1 border border-slate-200/80">
+                    <button type="button" onclick="switchWorkflowTab('tab-pending')" id="btn-tab-pending" 
+                            class="tab-btn active px-3.5 py-1.5 bg-white text-slate-900 font-semibold shadow-xs rounded-lg text-xs transition flex items-center">
+                        <span>1. รอการตรวจสอบ</span>
+                        <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1.5">{{ dashboard.pending_count }}</span>
+                    </button>
+                    
+                    <button type="button" onclick="switchWorkflowTab('tab-confirmed')" id="btn-tab-confirmed" 
+                            class="tab-btn px-3.5 py-1.5 text-slate-600 hover:text-slate-900 font-medium rounded-lg text-xs transition flex items-center">
+                        <span>2. อนุมัติแล้ว (คิวเต็ม)</span>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1.5">{{ dashboard.confirmed_count }}</span>
+                    </button>
+                    
+                    <button type="button" onclick="switchWorkflowTab('tab-closed')" id="btn-tab-closed" 
+                            class="tab-btn px-3.5 py-1.5 text-slate-600 hover:text-slate-900 font-medium rounded-lg text-xs transition flex items-center">
+                        <span>3. ปฏิเสธ / ยกเลิก</span>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1.5">{{ dashboard.rejected_count + dashboard.cancelled_count }}</span>
+                    </button>
+
+                    <button type="button" onclick="switchWorkflowTab('tab-all')" id="btn-tab-all" 
+                            class="tab-btn px-3.5 py-1.5 text-slate-600 hover:text-slate-900 font-medium rounded-lg text-xs transition flex items-center">
+                        <span>ประวัติทั้งหมด</span>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1.5">{{ dashboard.total_bookings }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= WORKFLOW TAB 1: รอการตรวจสอบ (PENDING INSPECTION) ================= -->
+            <div id="tab-pending" class="tab-content active p-0">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 flex items-center justify-between">
+                    <span>รายการคำขอจองคิวใหม่ที่รอตรวจสอบสลิปและยืนยันรับงาน</span>
+                    <span class="font-medium text-slate-700">รอการตรวจสอบ {{ pending_bookings|length }} รายการ</span>
+                </div>
+
+                {% if pending_bookings %}
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left text-xs sm:text-sm text-slate-800 border-collapse min-w-[840px]">
+                            <thead class="bg-slate-50 text-slate-600 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 w-14">#ID</th>
+                                    <th class="py-3 px-4 w-40">วันจัดงาน / วันที่ส่ง</th>
+                                    <th class="py-3 px-4 w-48">ผู้จอง &amp; ข้อมูลติดต่อ</th>
+                                    <th class="py-3 px-4">แพ็กเกจ &amp; สนาม &amp; ออพชั่น</th>
+                                    <th class="py-3 px-4 w-32 text-right">ยอดเงิน &amp; มัดจำ</th>
+                                    <th class="py-3 px-4 w-64 text-center">การดำเนินการตรวจสอบ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for b in pending_bookings %}
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-3.5 px-4 font-mono font-bold text-slate-700 align-top">
+                                        #{{ b.id }}
+                                    </td>
+                                    
+                                    <td class="py-3.5 px-4 align-top">
+                                        <span class="font-bold text-slate-900 text-sm block">{{ b.event_date }}</span>
+                                        <span class="text-[11px] text-slate-400 block mt-0.5">ส่งคำขอ: {{ b.created_at[:16] }}</span>
+                                        
+                                        {% if b.has_date_conflict %}
+                                            <div class="mt-1.5 inline-block bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-medium px-2 py-0.5 rounded">
+                                                วันเต็มแล้ว (คิว #{{ b.confirmed_by_id }})
+                                            </div>
+                                        {% else %}
+                                            <div class="mt-1.5 inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-medium px-2 py-0.5 rounded">
+                                                วันว่าง (พร้อมอนุมัติ)
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <div class="font-medium text-slate-900 text-xs sm:text-sm">{{ b.user_fullname or b.username }}</div>
+                                        <div class="text-xs text-sky-600 font-medium">@{{ b.username }}</div>
+                                        <div class="text-xs text-slate-500 mt-0.5 truncate">{{ b.user_email }}</div>
+                                        {% if b.user_phone %}
+                                        <div class="text-xs text-slate-400">โทร: {{ b.user_phone }}</div>
+                                        {% endif %}
+                                        <div class="mt-1">
+                                            <span class="inline-block text-[10px] font-medium text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                                                จ.{{ b.user_province or 'ขอนแก่น' }}
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <span class="font-bold text-slate-900 block text-xs sm:text-sm">{{ b.package_name }}</span>
+                                        <div class="mt-1 space-y-0.5 text-xs text-slate-600">
+                                            <div><span class="text-slate-400">เวลา:</span> {{ b.event_time or '08:00 - 17:00 น.' }}</div>
+                                            <div><span class="text-slate-400">สนาม:</span> {{ b.venue or 'ศูนย์กีฬาและสุขภาพ มหาวิทยาลัยขอนแก่น' }}</div>
+                                        </div>
+                                        {% if b.options_list %}
+                                            <div class="mt-1.5 flex flex-wrap gap-1">
+                                                {% for opt in b.options_list %}
+                                                    <span class="inline-block bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.5 rounded">
+                                                        + {{ opt }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        {% if b.note %}
+                                            <div class="text-xs text-slate-600 mt-1.5 bg-slate-50 p-2 rounded border border-slate-100">
+                                                <b>โน้ตผู้จอง:</b> {{ b.note }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="py-3.5 px-4 text-right align-top">
+                                        <span class="font-bold text-slate-900 text-sm block font-sans">฿{{ "{:,}".format(b.total_price) }}</span>
+                                        <span class="text-xs text-emerald-700 font-medium block mt-0.5 font-sans">มัดจำ 5%: ฿{{ "{:,.2f}".format(b.deposit_amount or 0) }}</span>
+                                        {% if b.slip_image %}
+                                            <a href="{{ b.slip_image }}" target="_blank" class="inline-block mt-1 text-xs text-sky-700 hover:underline font-medium">
+                                                [ดูสลิปโอนเงิน]
+                                            </a>
+                                        {% else %}
+                                            <span class="text-xs text-slate-400 block mt-1">[ยังไม่แนบสลิป]</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <!-- ฟอร์มการอนุมัติ/ปฏิเสธแบบเรียบง่าย -->
+                                        <div class="space-y-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                                            <form method="POST" action="/admin/bookings" class="space-y-2">
+                                                <input type="hidden" name="action" value="update_status">
+                                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+
+                                                <input type="text" name="admin_note" value="{{ b.admin_note or '' }}" 
+                                                        placeholder="ระบุข้อความตอบกลับ..."
+                                                        class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white outline-none focus:border-sky-500">
+
+                                                <div class="grid grid-cols-2 gap-1.5">
+                                                    {% if b.has_date_conflict %}
+                                                        <button type="button" disabled title="วันนี้มีคิวแข่งขันอื่นได้รับอนุมัติแล้ว"
+                                                                class="bg-slate-200 text-slate-400 text-xs font-medium py-1.5 px-2 rounded-md cursor-not-allowed">
+                                                            อนุมัติไม่ได้ (วันเต็ม)
+                                                        </button>
+                                                    {% else %}
+                                                        <button type="submit" name="new_status" value="confirmed" 
+                                                                onclick="return confirm('ยืนยันอนุมัติคิวจอง #{{ b.id }} ใช่หรือไม่?');"
+                                                                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-1.5 px-2 rounded-md transition shadow-xs cursor-pointer">
+                                                            อนุมัติ (รับงาน)
+                                                        </button>
+                                                    {% endif %}
+
+                                                    <button type="submit" name="new_status" value="rejected" 
+                                                            onclick="return confirm('ยืนยันปฏิเสธคิวจอง #{{ b.id }} ใช่หรือไม่?');"
+                                                            class="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium py-1.5 px-2 rounded-md transition cursor-pointer">
+                                                        ปฏิเสธ (คิวเต็ม)
+                                                    </button>
+                                                </div>
+                                            </form>
+
+                                            <div class="flex items-center justify-between pt-1 border-t border-slate-200 text-[11px]">
+                                                <form method="POST" action="/admin/bookings" onsubmit="return confirm('ยืนยันเปลี่ยนสถานะคิว #{{ b.id }} เป็น ยกเลิก ใช่หรือไม่?');">
+                                                    <input type="hidden" name="action" value="cancel_booking">
+                                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                                    <button type="submit" class="text-slate-500 hover:text-slate-800 underline cursor-pointer">
+                                                        ยกเลิกคิว
+                                                    </button>
+                                                </form>
+
+                                                <form method="POST" action="/admin/bookings" onsubmit="return confirm('ยืนยันลบรายการจอง #{{ b.id }} ออกจากระบบ?');">
+                                                    <input type="hidden" name="action" value="delete_booking">
+                                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                                    <button type="submit" class="text-rose-600 hover:text-rose-800 underline cursor-pointer">
+                                                        ลบรายการ
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-10 text-center text-slate-400 text-xs">
+                        ไม่มีคำขอจองคิวที่รอการตรวจสอบในขณะนี้
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ================= WORKFLOW TAB 2: ตรวจสอบแล้ว - อนุมัติสำเร็จ (CONFIRMED BOOKINGS) ================= -->
+            <div id="tab-confirmed" class="tab-content p-0">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 flex items-center justify-between">
+                    <span>รายการที่ตรวจสอบและอนุมัติจัดงานแข่งขันแล้ว (ล็อคปุ่มอนุมัติ/ปฏิเสธเรียบร้อย)</span>
+                    <span class="font-medium text-slate-700">จำนวน {{ confirmed_bookings|length }} รายการ</span>
+                </div>
+
+                {% if confirmed_bookings %}
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left text-xs sm:text-sm text-slate-800 border-collapse min-w-[840px]">
+                            <thead class="bg-slate-50 text-slate-600 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 w-14">#ID</th>
+                                    <th class="py-3 px-4 w-40">วันจัดงานแข่งขัน</th>
+                                    <th class="py-3 px-4 w-48">ผู้จอง &amp; ข้อมูลติดต่อ</th>
+                                    <th class="py-3 px-4">แพ็กเกจ &amp; สนาม</th>
+                                    <th class="py-3 px-4 w-32 text-right">ยอดเงิน &amp; มัดจำ</th>
+                                    <th class="py-3 px-4 w-60 text-center">สถานะ &amp; เอกสาร</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for b in confirmed_bookings %}
+                                <tr class="hover:bg-slate-50/70 transition-colors bg-white">
+                                    <td class="py-3.5 px-4 font-mono font-bold text-slate-700 align-top">
+                                        #{{ b.id }}
+                                    </td>
+                                    
+                                    <td class="py-3.5 px-4 align-top">
+                                        <span class="font-bold text-slate-900 text-sm block">{{ b.event_date }}</span>
+                                        <span class="text-[11px] text-slate-400 block mt-0.5">ส่งคำขอ: {{ b.created_at[:16] }}</span>
+                                        <div class="mt-1.5 inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-medium px-2 py-0.5 rounded">
+                                            ปิดคิวแล้ว (จัดงานจริง)
+                                        </div>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <div class="font-medium text-slate-900 text-xs sm:text-sm">{{ b.user_fullname or b.username }}</div>
+                                        <div class="text-xs text-sky-600 font-medium">@{{ b.username }}</div>
+                                        <div class="text-xs text-slate-500 mt-0.5 truncate">{{ b.user_email }}</div>
+                                        {% if b.user_phone %}
+                                        <div class="text-xs text-slate-400">โทร: {{ b.user_phone }}</div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <span class="font-bold text-slate-900 block text-xs sm:text-sm">{{ b.package_name }}</span>
+                                        <div class="mt-1 space-y-0.5 text-xs text-slate-600">
+                                            <div><span class="text-slate-400">เวลา:</span> {{ b.event_time or '08:00 - 17:00 น.' }}</div>
+                                            <div><span class="text-slate-400">สนาม:</span> {{ b.venue or 'ศูนย์กีฬาและสุขภาพ มหาวิทยาลัยขอนแก่น' }}</div>
+                                        </div>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 text-right align-top">
+                                        <span class="font-bold text-slate-900 text-sm block font-sans">฿{{ "{:,}".format(b.total_price) }}</span>
+                                        <span class="text-xs text-emerald-700 font-medium block mt-0.5 font-sans">มัดจำ 5%: ฿{{ "{:,.2f}".format(b.deposit_amount or 0) }}</span>
+                                        <span class="text-[11px] text-slate-400 block font-sans">คงเหลือ: ฿{{ "{:,.2f}".format(b.total_price - (b.deposit_amount or 0)) }}</span>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <!-- ล็อคปุ่มอนุมัติ/ปฏิเสธแล้ว - แสดงผลการตรวจสอบและลิงก์เอกสาร -->
+                                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center space-y-2">
+                                            <div class="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded text-xs font-medium">
+                                                อนุมัติจัดงานเรียบร้อย
+                                            </div>
+
+                                            {% if b.admin_note %}
+                                                <div class="text-xs text-slate-600 bg-white p-2 rounded border border-slate-200 text-left">
+                                                    โน้ต: {{ b.admin_note }}
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="flex flex-wrap items-center justify-center gap-1.5 text-xs">
+                                                {% if b.slip_image %}
+                                                    <a href="{{ b.slip_image }}" target="_blank" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded font-medium transition">
+                                                        ดูสลิป
+                                                    </a>
+                                                {% endif %}
+                                                <a href="/invoice/{{ b.id }}" target="_blank" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded font-medium transition">
+                                                    ใบเสร็จ / ใบกำกับ ↗
+                                                </a>
+                                            </div>
+
+                                            <div class="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[11px]">
+                                                <form method="POST" action="/admin/bookings" onsubmit="return confirm('ยืนยันเปลี่ยนสถานะคิว #{{ b.id }} เป็น ยกเลิก ใช่หรือไม่?');">
+                                                    <input type="hidden" name="action" value="cancel_booking">
+                                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                                    <button type="submit" class="text-slate-500 hover:text-slate-800 underline cursor-pointer">
+                                                        ยกเลิกคิว
+                                                    </button>
+                                                </form>
+
+                                                <form method="POST" action="/admin/bookings" onsubmit="return confirm('ยืนยันลบรายการจอง #{{ b.id }} ออกจากระบบ?');">
+                                                    <input type="hidden" name="action" value="delete_booking">
+                                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                                    <button type="submit" class="text-rose-600 hover:text-rose-800 underline cursor-pointer">
+                                                        ลบรายการ
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-10 text-center text-slate-400 text-xs">
+                        ยังไม่มีรายการที่ได้รับการอนุมัติ
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ================= WORKFLOW TAB 3: ตรวจสอบแล้ว - ปฏิเสธหรือยกเลิก (CLOSED BOOKINGS) ================= -->
+            <div id="tab-closed" class="tab-content p-0">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 flex items-center justify-between">
+                    <span>รายการที่ปฏิเสธคำขอหรือยกเลิกคิวงาน (ล็อคปุ่มอนุมัติ/ปฏิเสธเรียบร้อย)</span>
+                    <span class="font-medium text-slate-700">จำนวน {{ rejected_cancelled_bookings|length }} รายการ</span>
+                </div>
+
+                {% if rejected_cancelled_bookings %}
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left text-xs sm:text-sm text-slate-800 border-collapse min-w-[840px]">
+                            <thead class="bg-slate-50 text-slate-600 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 w-14">#ID</th>
+                                    <th class="py-3 px-4 w-40">วันจัดงาน / วันที่ส่ง</th>
+                                    <th class="py-3 px-4 w-48">ผู้จอง &amp; ข้อมูลติดต่อ</th>
+                                    <th class="py-3 px-4">แพ็กเกจที่ขอจอง</th>
+                                    <th class="py-3 px-4 w-32 text-right">ยอดเงิน</th>
+                                    <th class="py-3 px-4 w-60 text-center">ผลการตรวจสอบ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for b in rejected_cancelled_bookings %}
+                                <tr class="hover:bg-slate-50/70 transition-colors bg-white">
+                                    <td class="py-3.5 px-4 font-mono font-bold text-slate-400 align-top">
+                                        #{{ b.id }}
+                                    </td>
+                                    
+                                    <td class="py-3.5 px-4 align-top">
+                                        <span class="font-medium text-slate-700 text-sm block">{{ b.event_date }}</span>
+                                        <span class="text-[11px] text-slate-400 block mt-0.5">ส่งคำขอ: {{ b.created_at[:16] }}</span>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <div class="font-medium text-slate-800 text-xs sm:text-sm">{{ b.user_fullname or b.username }}</div>
+                                        <div class="text-xs text-slate-400">@{{ b.username }}</div>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <span class="font-medium text-slate-700 block text-xs sm:text-sm">{{ b.package_name }}</span>
+                                        <div class="text-xs text-slate-400 mt-0.5">{{ b.venue or 'ศูนย์กีฬา มข.' }}</div>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 text-right align-top">
+                                        <span class="font-medium text-slate-700 text-sm block font-sans">฿{{ "{:,}".format(b.total_price) }}</span>
+                                    </td>
+
+                                    <td class="py-3.5 px-4 align-top">
+                                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center space-y-1.5">
+                                            {% if b.status == 'rejected' %}
+                                                <div class="inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-medium">
+                                                    ปฏิเสธคำขอ (คิวเต็ม)
+                                                </div>
+                                            {% else %}
+                                                <div class="inline-block bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-xs font-medium">
+                                                    ยกเลิกคิวแล้ว
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="text-xs text-slate-500 bg-white p-2 rounded border border-slate-200 text-left">
+                                                โน้ต: {{ b.admin_note or 'คิวเต็มหรือผู้จองแจ้งยกเลิก' }}
+                                            </div>
+
+                                            <div class="pt-1 text-right">
+                                                <form method="POST" action="/admin/bookings" onsubmit="return confirm('ยืนยันลบรายการจอง #{{ b.id }} ออกจากระบบ?');">
+                                                    <input type="hidden" name="action" value="delete_booking">
+                                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                                    <button type="submit" class="text-rose-600 hover:text-rose-800 underline text-xs cursor-pointer">
+                                                        ลบประวัติรายการ
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-10 text-center text-slate-400 text-xs">
+                        ไม่มีรายการที่ถูกปฏิเสธหรือยกเลิก
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ================= WORKFLOW TAB 4: ประวัติรายการทั้งหมด (ALL BOOKINGS) ================= -->
+            <div id="tab-all" class="tab-content p-0">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 flex items-center justify-between">
+                    <span>ภาพรวมประวัติคำขอจองคิวแข่งขันทั้งหมดในระบบ</span>
+                    <span class="font-medium text-slate-700">รวมทั้งหมด {{ bookings|length }} รายการ</span>
+                </div>
+
+                {% if bookings %}
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left text-xs sm:text-sm text-slate-800 border-collapse min-w-[840px]">
+                            <thead class="bg-slate-50 text-slate-600 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 w-14">#ID</th>
+                                    <th class="py-3 px-4 w-36">วันจัดงาน</th>
+                                    <th class="py-3 px-4 w-44">ผู้จอง</th>
+                                    <th class="py-3 px-4">แพ็กเกจ</th>
+                                    <th class="py-3 px-4 w-28 text-right">ยอดรวม</th>
+                                    <th class="py-3 px-4 w-36 text-center">สถานะ</th>
+                                    <th class="py-3 px-4 w-44 text-center">การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for b in bookings %}
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-3 px-4 font-mono font-bold text-slate-600 align-top">
+                                        #{{ b.id }}
+                                    </td>
+                                    <td class="py-3 px-4 align-top">
+                                        <span class="font-medium text-slate-900 text-xs sm:text-sm block">{{ b.event_date }}</span>
+                                        <span class="text-[11px] text-slate-400 block">{{ b.created_at[:10] }}</span>
+                                    </td>
+                                    <td class="py-3 px-4 align-top">
+                                        <div class="font-medium text-slate-900 text-xs">{{ b.user_fullname or b.username }}</div>
+                                        <div class="text-xs text-sky-600">@{{ b.username }}</div>
+                                    </td>
+                                    <td class="py-3 px-4 align-top">
+                                        <span class="font-medium text-slate-900 block text-xs">{{ b.package_name }}</span>
+                                        <span class="text-[11px] text-slate-400">{{ b.venue or 'ศูนย์กีฬา มข.' }}</span>
+                                    </td>
+                                    <td class="py-3 px-4 text-right align-top font-sans">
+                                        <span class="font-medium text-slate-900 text-xs block">฿{{ "{:,}".format(b.total_price) }}</span>
+                                        <span class="text-[11px] text-emerald-700 block">มัดจำ ฿{{ "{:,.2f}".format(b.deposit_amount or 0) }}</span>
+                                    </td>
+                                    <td class="py-3 px-4 text-center align-top">
+                                        {% if b.status == 'confirmed' %}
+                                            <span class="inline-block text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                                อนุมัติแล้ว
+                                            </span>
+                                        {% elif b.status == 'rejected' %}
+                                            <span class="inline-block text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                                ปฏิเสธแล้ว
+                                            </span>
+                                        {% elif b.status == 'cancelled' %}
+                                            <span class="inline-block text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                                ยกเลิกแล้ว
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-block text-[11px] font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                                รอตรวจสอบ
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 px-4 text-center align-top text-xs">
+                                        {% if b.status == 'pending' %}
+                                            <button type="button" onclick="switchWorkflowTab('tab-pending')" class="text-sky-700 hover:underline font-medium">
+                                                ไปหน้าตรวจสอบ
+                                            </button>
+                                        {% elif b.status == 'confirmed' %}
+                                            <a href="/invoice/{{ b.id }}" target="_blank" class="text-slate-700 hover:underline font-medium">
+                                                ดูใบเสร็จ ↗
+                                            </a>
+                                        {% else %}
+                                            <span class="text-slate-400">- ตรวจสอบแล้ว -</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-10 text-center text-slate-400 text-xs">
+                        ยังไม่มีรายการจองในระบบ
+                    </div>
+                {% endif %}
+            </div>
+
+        </section>
+        </div>
+
+        <!-- ================= VIEW 3: ตารางจัดการบัญชีสมาชิก (USER ACCOUNTS) ================= -->
+        <div id="view-users" class="admin-view space-y-6 {% if active_view == 'users' %}active{% endif %}">
+        <section id="users-management" class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-sm sm:text-base text-slate-900">
+                        จัดการบัญชีสมาชิกที่ลงทะเบียน
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">รายชื่อสมาชิกและสถิติการใช้งานระบบ</p>
+                </div>
+                <span class="text-xs text-slate-600 bg-white px-2.5 py-1 rounded-md border border-slate-200 font-medium">
+                    {{ users|length if users else 0 }} บัญชี
+                </span>
+            </div>
+
+            {% if users %}
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left text-xs sm:text-sm text-slate-800 border-collapse min-w-[700px]">
+                        <thead class="bg-slate-50 text-slate-600 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-4 w-14">#ID</th>
+                                <th class="py-3 px-4">ชื่อผู้ใช้ (Username)</th>
+                                <th class="py-3 px-4">จังหวัด</th>
+                                <th class="py-3 px-4">อีเมล &amp; เบอร์โทร</th>
+                                <th class="py-3 px-4">บทบาท</th>
+                                <th class="py-3 px-4 text-center">ยอดการจอง</th>
+                                <th class="py-3 px-4">วันที่สมัคร</th>
+                                <th class="py-3 px-4 text-center w-28">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for u in users %}
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-3 px-4 font-mono font-medium text-slate-400">#{{ u.id }}</td>
+                                <td class="py-3 px-4">
+                                    <div class="font-medium text-slate-900">{{ u.fullname or u.username }}</div>
+                                    <div class="text-xs text-sky-600">@{{ u.username }}</div>
+                                </td>
+                                <td class="py-3 px-4 text-xs text-slate-600">
+                                    {{ u.province or 'ขอนแก่น' }}
+                                </td>
+                                <td class="py-3 px-4 text-xs text-slate-600">
+                                    <div>{{ u.email }}</div>
+                                    <div class="text-slate-400">{{ u.phone or '-' }}</div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    {% if u.role == 'admin' %}
+                                        <span class="inline-block text-[10px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                            ผู้ดูแลระบบ
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-block text-[10px] font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                                            สมาชิก
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 px-4 font-medium text-slate-700 text-center">
+                                    {{ u.booking_count }} คิว
+                                </td>
+                                <td class="py-3 px-4 text-xs text-slate-400">
+                                    {{ u.created_at[:10] if u.created_at else '-' }}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    {% if u.username != (current_user.username if current_user else 'admin') %}
+                                    <form method="POST" action="/admin/bookings" 
+                                          onsubmit="return confirm('คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการลบบัญชี @{{ u.username }} นี้ออกจากระบบ? การกระทำนี้จะลบรายการจองของผู้ใช้นี้ทั้งหมดด้วย');"
+                                          class="inline-block">
+                                        <input type="hidden" name="action" value="delete_user">
+                                        <input type="hidden" name="target_username" value="{{ u.username }}">
+                                        <button type="submit" class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs rounded transition cursor-pointer">
+                                            ลบบัญชี
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-xs text-slate-400 italic">(บัญชีคุณ)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="p-6 text-center text-slate-400 text-xs">
+                    ไม่พบข้อมูลบัญชีผู้ใช้งาน
+                </div>
+            {% endif %}
+        </section>
+        </div>
+
+        <!-- ================= VIEW 4: ระบบสำรองและกู้คืนฐานข้อมูล (DATABASE BACKUP) ================= -->
+        <div id="view-database" class="admin-view space-y-6 {% if active_view == 'database' %}active{% endif %}">
+        <section id="db-management" class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-sm sm:text-base text-slate-900">
+                        ระบบสำรองและกู้คืนฐานข้อมูล
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">ระบบสำรองอัตโนมัติ (Auto-Backup &amp; Auto-Recovery)</p>
+                </div>
+                <span class="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 font-medium">
+                    ระบบพร้อมทำงาน
+                </span>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    ระบบจะสำรองข้อมูลอัตโนมัติเมื่อมีการจองใหม่ และจะกู้คืนข้อมูลให้อัตโนมัติเมื่อระบบเริ่มทำงานใหม่
+                </p>
+
+                <!-- การ์ดสถานะไฟล์สำรองแบบเรียบง่าย -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 text-[11px] block">ไฟล์สำรองสคริปต์ SQL:</span>
+                        <span class="font-medium text-slate-800 font-mono mt-0.5 block">database_backup.sql</span>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 text-[11px] block">ไฟล์สำรองฐานข้อมูลไบนารี SQLite:</span>
+                        <span class="font-medium text-slate-800 font-mono mt-0.5 block">database_backup.db</span>
+                    </div>
+                </div>
+
+                <!-- ปุ่มสั่งการด้วยตนเอง -->
+                <div class="pt-2 flex flex-wrap items-center gap-2.5">
+                    <form method="POST" action="/admin/backup">
+                        <button type="submit" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-lg transition cursor-pointer">
+                            สำรองข้อมูลเดี๋ยวนี้ (Backup)
+                        </button>
+                    </form>
+                    <form method="POST" action="/admin/restore" onsubmit="return confirm('คุณต้องการกู้คืนฐานข้อมูลจากไฟล์สำรองใช่หรือไม่?');">
+                        <button type="submit" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium rounded-lg transition cursor-pointer">
+                            กู้คืนฐานข้อมูล (Restore)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        </div>
+
+    </main>
+
+    <!-- JavaScript ควบคุมการสลับหน้าระหว่างเฮดดิ้ง (Admin View Switcher) และสลับแท็บปฏิบัติงาน (Workflow Tabs) -->
+    <script>
+    const viewMetadata = {
+        'dashboard': {
+            breadcrumb: 'ระบบรายงานสถิติภาพรวม',
+            title: 'สรุปผลสัมฤทธิ์และสถิติภาพรวม',
+            desc: 'ติดตามสถิติการดำเนินงาน อัตราความสำเร็จ และสถิติเชิงลึก'
+        },
+        'workflow': {
+            breadcrumb: 'ระบบจัดการและควบคุมงาน',
+            title: 'ลำดับปฏิบัติงานและการตรวจสอบคิว',
+            desc: 'ตรวจสอบคำขอจองคิวงาน อนุมัติคิว และจัดการสถานะตามลำดับปฏิบัติงาน'
+        },
+        'users': {
+            breadcrumb: 'ระบบบริหารจัดการผู้ใช้งาน',
+            title: 'จัดการบัญชีสมาชิกที่ลงทะเบียน',
+            desc: 'ตรวจสอบรายชื่อสมาชิก สถิติการจอง และสิทธิ์การใช้งาน'
+        },
+        'database': {
+            breadcrumb: 'ระบบความปลอดภัยและข้อมูล',
+            title: 'ระบบสำรองและกู้คืนฐานข้อมูล',
+            desc: 'จัดการไฟล์สำรองข้อมูลอัตโนมัติ และกู้คืนข้อมูลระบบ (Auto-Recovery)'
+        }
+    };
+
+    function switchAdminView(viewId, event) {
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+
+        // 1. ซ่อนทุกหน้า และแสดงเฉพาะหน้าที่เลือก
+        const allViews = document.querySelectorAll('.admin-view');
+        allViews.forEach(v => v.classList.remove('active'));
+
+        const targetView = document.getElementById('view-' + viewId);
+        if (targetView) {
+            targetView.classList.add('active');
+        }
+
+        // 2. อัปเดตสไตล์ลิงก์บนแถบเมนูด้านบน (Desktop Navbar)
+        const desktopNavs = document.querySelectorAll('.admin-nav-btn');
+        desktopNavs.forEach(btn => {
+            btn.classList.remove('text-slate-900', 'font-semibold', 'border-slate-900');
+            btn.classList.add('text-slate-500', 'font-medium', 'border-transparent');
+        });
+        const activeDesktopBtn = document.getElementById('nav-item-' + viewId);
+        if (activeDesktopBtn) {
+            activeDesktopBtn.classList.remove('text-slate-500', 'font-medium', 'border-transparent');
+            activeDesktopBtn.classList.add('text-slate-900', 'font-semibold', 'border-slate-900');
+        }
+
+        // 3. อัปเดตสไตล์ปุ่มบนแถบเมนูมือถือ (Mobile Sub-nav)
+        const mobNavs = document.querySelectorAll('.mob-nav-btn');
+        mobNavs.forEach(btn => {
+            btn.classList.remove('bg-slate-900', 'text-white');
+            btn.classList.add('bg-slate-100', 'text-slate-700');
+        });
+        const activeMobBtn = document.getElementById('mob-nav-' + viewId);
+        if (activeMobBtn) {
+            activeMobBtn.classList.remove('bg-slate-100', 'text-slate-700');
+            activeMobBtn.classList.add('bg-slate-900', 'text-white');
+        }
+
+        // 4. อัปเดตข้อมูลหัวข้อและคำอธิบายหน้า (Breadcrumb, Title, Description)
+        if (viewMetadata[viewId]) {
+            const meta = viewMetadata[viewId];
+            const elBreadcrumb = document.getElementById('view-breadcrumb');
+            const elTitle = document.getElementById('view-title');
+            const elDesc = document.getElementById('view-desc');
+            if (elBreadcrumb) elBreadcrumb.textContent = meta.breadcrumb;
+            if (elTitle) elTitle.textContent = meta.title;
+            if (elDesc) elDesc.textContent = meta.desc;
+        }
+
+        // 5. ซิงก์ URL ในแอดเดรสบาร์ให้ตรงกับหน้าที่กำลังเปิด โดยไม่ต้องโหลดหน้าใหม่
+        if (window.history && window.history.pushState) {
+            const newUrl = '/admin/bookings?view=' + viewId;
+            if (window.location.search !== '?view=' + viewId && window.location.pathname !== '/admin/' + viewId) {
+                window.history.pushState({ view: viewId }, '', newUrl);
+            }
+        }
+
+        // หากเปิดหน้า Dashboard ให้เริ่มวาดกราฟแท่ง
+        if (viewId === 'dashboard') {
+            setTimeout(initDashboardBarCharts, 80);
+        }
+
+        // เลื่อนขึ้นด้านบนหน้าอย่างนุ่มนวล
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // รองรับปุ่มย้อนกลับ / ไปข้างหน้า (Back / Forward) ของเบราว์เซอร์
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.view) {
+            switchAdminView(event.state.view);
+        } else {
+            const params = new URLSearchParams(window.location.search);
+            const viewParam = params.get('view') || 'dashboard';
+            switchAdminView(viewParam);
+        }
+    });
+
+    // เริ่มต้นแสดงผลหน้าตาม query param หรือค่า active_view
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedView = urlParams.get('view') || '{{ active_view or "dashboard" }}';
+        if (['dashboard', 'workflow', 'users', 'database'].includes(requestedView)) {
+            switchAdminView(requestedView);
+        } else {
+            switchAdminView('dashboard');
+        }
+        setTimeout(initDashboardBarCharts, 120);
+    });
+
+    // ================= 6. กราฟแท่งสถิติภาพรวมและการดำเนินงาน (Chart.js Integration) =================
+    const chartAnalyticsData = {
+        totalBookings: {{ dashboard.total_bookings }},
+        pendingCount: {{ dashboard.pending_count }},
+        confirmedCount: {{ dashboard.confirmed_count }},
+        rejectedCount: {{ dashboard.rejected_count + dashboard.cancelled_count }},
+        successRate: {{ dashboard.success_rate }},
+        packages: [
+            {% for pkg_name, p_data in dashboard.package_stats %}
+            {
+                name: {{ pkg_name|tojson }},
+                count: {{ p_data.count }},
+                confirmed: {{ p_data.confirmed }},
+                revenue: {{ p_data.revenue }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        venues: [
+            {% for venue_name, v_data in dashboard.venue_stats %}
+            {
+                name: {{ venue_name|tojson }},
+                count: {{ v_data.count }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        provinces: [
+            {% for prov_name, count in dashboard.province_stats[:6] %}
+            {
+                name: {{ prov_name|tojson }},
+                count: {{ count }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    let dashboardBarCharts = {};
+
+    function initDashboardBarCharts() {
+        if (typeof Chart === 'undefined') return;
+
+        Chart.defaults.font.family = "'Prompt', 'Sarabun', sans-serif";
+        Chart.defaults.color = '#475569';
+
+        // 1. กราฟแท่งสถานะการดำเนินงาน
+        const canvasStatus = document.getElementById('chartStatus');
+        if (canvasStatus) {
+            if (dashboardBarCharts.status) {
+                dashboardBarCharts.status.destroy();
+            }
+            dashboardBarCharts.status = new Chart(canvasStatus, {
+                type: 'bar',
+                data: {
+                    labels: ['คำขอทั้งหมด', 'รออนุมัติ', 'อนุมัติแล้ว', 'ปฏิเสธ/ยกเลิก'],
+                    datasets: [{
+                        label: 'จำนวนคิวงาน',
+                        data: [
+                            chartAnalyticsData.totalBookings,
+                            chartAnalyticsData.pendingCount,
+                            chartAnalyticsData.confirmedCount,
+                            chartAnalyticsData.rejectedCount
+                        ],
+                        backgroundColor: [
+                            'rgba(2, 132, 199, 0.85)',
+                            'rgba(245, 158, 11, 0.85)',
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(239, 68, 68, 0.85)'
+                        ],
+                        borderColor: ['#0284c7', '#f59e0b', '#10b981', '#ef4444'],
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        maxBarThickness: 44
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            bodyFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(ctx) {
+                                    const total = chartAnalyticsData.totalBookings || 1;
+                                    const pct = Math.round((ctx.parsed.y / total) * 100);
+                                    return ` ${ctx.dataset.label}: ${ctx.parsed.y} คิว (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#64748b'
+                            },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        x: {
+                            ticks: {
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 12 },
+                                color: '#334155'
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. กราฟแท่งความนิยมแพ็กเกจ
+        const canvasPackage = document.getElementById('chartPackage');
+        if (canvasPackage && chartAnalyticsData.packages.length > 0) {
+            if (dashboardBarCharts.package) {
+                dashboardBarCharts.package.destroy();
+            }
+            dashboardBarCharts.package = new Chart(canvasPackage, {
+                type: 'bar',
+                data: {
+                    labels: chartAnalyticsData.packages.map(p => p.name),
+                    datasets: [
+                        {
+                            label: 'คำขอจองทั้งหมด (คิว)',
+                            data: chartAnalyticsData.packages.map(p => p.count),
+                            backgroundColor: 'rgba(56, 189, 248, 0.85)',
+                            borderColor: '#38bdf8',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            maxBarThickness: 32
+                        },
+                        {
+                            label: 'อนุมัติแล้ว (คิว)',
+                            data: chartAnalyticsData.packages.map(p => p.confirmed),
+                            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                            borderColor: '#10b981',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            maxBarThickness: 32
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#475569'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            bodyFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#64748b'
+                            },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        x: {
+                            ticks: {
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#334155'
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. กราฟแท่งสนามแข่งขันในขอนแก่น
+        const canvasVenue = document.getElementById('chartVenue');
+        if (canvasVenue && chartAnalyticsData.venues.length > 0) {
+            if (dashboardBarCharts.venue) {
+                dashboardBarCharts.venue.destroy();
+            }
+            dashboardBarCharts.venue = new Chart(canvasVenue, {
+                type: 'bar',
+                data: {
+                    labels: chartAnalyticsData.venues.map(v => v.name),
+                    datasets: [{
+                        label: 'ความถี่การจอง (ครั้ง)',
+                        data: chartAnalyticsData.venues.map(v => v.count),
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        maxBarThickness: 26
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            bodyFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#64748b'
+                            },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        y: {
+                            ticks: {
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#334155'
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. กราฟแท่งจังหวัดของผู้จัด
+        const canvasProvince = document.getElementById('chartProvince');
+        if (canvasProvince && chartAnalyticsData.provinces.length > 0) {
+            if (dashboardBarCharts.province) {
+                dashboardBarCharts.province.destroy();
+            }
+            dashboardBarCharts.province = new Chart(canvasProvince, {
+                type: 'bar',
+                data: {
+                    labels: chartAnalyticsData.provinces.map(p => p.name),
+                    datasets: [{
+                        label: 'จำนวนคิวงาน (คิว)',
+                        data: chartAnalyticsData.provinces.map(p => p.count),
+                        backgroundColor: 'rgba(13, 148, 136, 0.85)',
+                        borderColor: '#0d9488',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        maxBarThickness: 26
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            bodyFont: { family: "'Prompt', 'Sarabun', sans-serif" },
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#64748b'
+                            },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        y: {
+                            ticks: {
+                                font: { family: "'Prompt', 'Sarabun', sans-serif", size: 11 },
+                                color: '#334155'
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function toggleAnalyticsView(mode) {
+        const chartView = document.getElementById('analytics-chart-view');
+        const listView = document.getElementById('analytics-list-view');
+        const btnChart = document.getElementById('btnToggleChart');
+        const btnList = document.getElementById('btnToggleList');
+
+        if (mode === 'chart') {
+            if (chartView) chartView.classList.remove('hidden');
+            if (listView) listView.classList.add('hidden');
+            if (btnChart) {
+                btnChart.className = 'px-3 py-1.5 text-xs font-semibold rounded-md bg-white text-slate-900 shadow-2xs transition cursor-pointer';
+            }
+            if (btnList) {
+                btnList.className = 'px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
+            }
+            setTimeout(initDashboardBarCharts, 50);
+        } else {
+            if (chartView) chartView.classList.add('hidden');
+            if (listView) listView.classList.remove('hidden');
+            if (btnList) {
+                btnList.className = 'px-3 py-1.5 text-xs font-semibold rounded-md bg-white text-slate-900 shadow-2xs transition cursor-pointer';
+            }
+            if (btnChart) {
+                btnChart.className = 'px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
+            }
+        }
+    }
+
+    // สลับแท็บย่อยในลำดับปฏิบัติงาน (Operational Workflow Stages)
+    function switchWorkflowTab(tabId) {
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => content.classList.remove('active'));
+
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active', 'bg-white', 'text-slate-900', 'font-semibold', 'shadow-xs');
+            btn.classList.add('text-slate-600', 'font-medium');
+        });
+
+        const targetContent = document.getElementById(tabId);
+        if (targetContent) targetContent.classList.add('active');
+
+        const activeBtn = document.getElementById('btn-' + tabId);
+        if (activeBtn) {
+            activeBtn.classList.remove('text-slate-600', 'font-medium');
+            activeBtn.classList.add('active', 'bg-white', 'text-slate-900', 'font-semibold', 'shadow-xs');
+        }
+    }
+    </script>
+</body>
+</html>
